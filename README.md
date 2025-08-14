@@ -2,6 +2,7 @@
 # ppwdeming
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/jjkraker/ppwdeming/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jjkraker/ppwdeming/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 The goal of ppwdeming is to provide functions for weighted Deming regression, using weights modeled via precision profile
