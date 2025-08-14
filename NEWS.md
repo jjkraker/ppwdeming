@@ -6,6 +6,6 @@
 
 * Minor updates to documentation.
 
-# ppwdeming (development versions)
+# ppwdeming 0.0.0.9012
 
 * Most recently updated simplified examples
