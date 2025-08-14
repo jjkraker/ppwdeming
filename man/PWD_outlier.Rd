@@ -36,7 +36,9 @@ This function tests for outliers from the fitted regression, and refits on
 a sanitized data set (with outliers removed).
 }
 \details{
-\emph{To be added from paper}
+The method is modeled on the Rosner sequential ESD outlier procedure and
+assumes the sample is large enough to assume normality of the predicted
+residuals.
 }
 \examples{
 # library

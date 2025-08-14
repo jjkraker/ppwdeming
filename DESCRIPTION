@@ -1,5 +1,5 @@
 Package: ppwdeming
-Version: 0.0.0.9012
+Version: 0.99.0
 Date: 2025-08-08
 Title: Precision Profile Weighted Deming Regression 
 Authors@R: c(person("Douglas M.", "Hawkins", role = "aut"),
@@ -27,7 +27,7 @@ Description: Weighted Deming regression, also known as "errors-in-variable" regr
   significant outliers for closer investigation.
   Further information on mathematical derivations and applications is documented 
   by DM Hawkins and JJ Kraker on Arxiv (2025, <arXiv:2508.02888>).
-License: GPL (>=3)
+License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2

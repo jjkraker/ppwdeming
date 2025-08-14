@@ -32,6 +32,8 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
+#' @example /Examples/WD_Linnet_man_example.R
+#'
 #' @references Linnet K. Evaluation of regression procedures for methods comparison studies,
 #' 1993. *Clinical Chemistry*, **39**: 424-432.
 #'

@@ -16,7 +16,9 @@
 #' @param printem	  *optional* - if TRUE, routine will print out results.
 #'
 #' @details
-#' *To be added from paper*
+#' The method is modeled on the Rosner sequential ESD outlier procedure and
+#' assumes the sample is large enough to assume normality of the predicted
+#' residuals.
 #'
 #' @returns A list containing the following components:
 #'

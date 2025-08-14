@@ -48,6 +48,8 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
+#' @example /Examples/PWD_known_man_example.R
+#'
 #' @export
 
 PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10, MDL=NA, getCI=TRUE, printem=TRUE) {
