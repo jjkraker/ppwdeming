@@ -1,13 +1,11 @@
-# ppwdeming 2.0.0
+# ppwdeming 1.0.0
 
-# ppwdeming (development versions)
-
-* Most recently updated simplified examples
+* Initial CRAN submission.
 
 # ppwdeming 0.99.0
 
 * Minor updates to documentation.
 
-# ppwdeming 1.0.0
+# ppwdeming (development versions)
 
-* Initial CRAN submission.
+* Most recently updated simplified examples
