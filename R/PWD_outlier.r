@@ -33,7 +33,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/PWD_outlier_man_example.R
+#' @example /Example/PWD_outlier_man_example.R
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).

@@ -7,7 +7,7 @@
 #' also provides the resulting weighted Deming fit and residuals.
 #'
 #' @usage
-#' PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=TRUE)
+#' PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
@@ -39,7 +39,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/PWD_get_gh_man_example.R
+#' @example /Example/PWD_get_gh_man_example.R
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).
@@ -51,7 +51,7 @@
 #'
 #' @export
 
-PWD_get_gh <- function(X, Y, lambda=1, epsilon=1.e-8, printem=TRUE) {
+PWD_get_gh <- function(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE) {
 
   key  <- order(X)
   sX   <- X[key]

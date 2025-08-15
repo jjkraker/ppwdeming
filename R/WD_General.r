@@ -31,7 +31,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/WD_general_man_example.R
+#' @example /Example/WD_general_man_example.R
 #'
 #' @references Ripley BD and Thompson M (1987). Regression techniques for the detection
 #' of analytical bias.  *Analyst*, **112**, 377-383.

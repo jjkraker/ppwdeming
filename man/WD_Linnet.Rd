@@ -4,7 +4,7 @@
 \alias{WD_Linnet}
 \title{Linnet proportional CV weighted Deming}
 \usage{
-WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE)
+WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}
@@ -37,9 +37,6 @@ A list containing the following components:
 \description{
 This routine, provided for convenience, makes Linnet’s constant CV fit.
 }
-\details{
-\emph{This could be added upon literature review.}
-}
 \examples{
 # library
 library(ppwdeming)
@@ -49,19 +46,17 @@ alpha <- 1
 beta  <- 1.1
 true  <- 8*10^((0:99)/99)
 truey <- alpha+beta*true
-# Loosely motivated by Vitamin D data set
-g     <- 4e-16+0.07*true^1.27
-h     <- 6e-2+7e-5*truey^2.2
+kappa <- 0.1
 
 # simulate single sample - set seed for reproducibility
 set.seed(1039)
 # specifications for predicate method
-X     <- true +sqrt(g)*rnorm(100)
+X     <- true *(1+kappa*rnorm(100))
 # specifications for test method
-Y     <- truey+sqrt(h)*rnorm(100)
+Y     <- truey *(1+kappa*rnorm(100))
 
 # fit with to estimate linear parameters
-wd_fit <- WD_Linnet(X,Y)
+wd_fit <- WD_Linnet(X,Y,MDL=12)
 cat("\nThe Linnet constant-CV estimated intercept is",
     signif(wd_fit$alpha,4), "and the estimated slope is",
     signif(wd_fit$beta,4), "\n")

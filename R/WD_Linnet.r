@@ -5,7 +5,7 @@
 #' This routine, provided for convenience, makes Linnet’s constant CV fit.
 #'
 #' @usage
-#' WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE)
+#' WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
@@ -14,9 +14,6 @@
 #' @param getCI		if TRUE, generates jackknife standard errors,
 #' @param epsilon		optional tolerance limit,
 #' @param printem	if TRUE, prints results.
-#'
-#' @details
-#' *This could be added upon literature review.*
 #'
 #' @returns A list containing the following components:
 #'
@@ -32,7 +29,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/WD_Linnet_man_example.R
+#' @example /Example/WD_Linnet_man_example.R
 #'
 #' @references Linnet K (1993). Evaluation of regression procedures for methods
 #' comparison studies. *Clinical Chemistry*, **39**, 424-432.
@@ -41,7 +38,7 @@
 #'
 #' @export
 
-WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE) {
+WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE) {
   pseuda <- NULL
   pseudb <- NULL
   n      <- length(X)
@@ -93,6 +90,9 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
   preMDL  <- NA
   preMDLl <- NA
   preMDLu <- NA
+
+  tcut <- qt(0.975, n-1)
+
   if (getCI) {
     sealpha <- sd(pseuda) / sqrt(n)
     sebeta  <- sd(pseudb) / sqrt(n)
@@ -107,7 +107,6 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
   }
   if (getCI & printem) {
     cat(sprintf("Linnet weighted Deming\n\testimate\tse\tCI\n"))
-    tcut <- qt(0.975, n-1)
     CIa <- alpha + sealpha * c(-tcut, tcut)
     CIb <- beta  + sebeta  * c(-tcut, tcut)
     cat(sprintf("Intercept\t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", alpha, sealpha, CIa[1], CIa[2]))

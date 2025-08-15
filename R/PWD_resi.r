@@ -6,7 +6,7 @@
 #' **residuals** from the fit (via `PWD_inference`).
 #'
 #' @usage
-#' PWD_resi(true, resi, epsilon=1e-5, printem=FALSE)
+#' PWD_resi(true, resi, epsilon=1e-5, printem=TRUE)
 #'
 #' @param true  	the vector of values used to predict the precision – commonly X,
 #' @param resi		the vector of residuals whose variance is thought to be a function of “true”,
@@ -40,7 +40,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/PWD_resi_man_example.R
+#' @example /Example/PWD_resi_man_example.R
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).
@@ -53,7 +53,7 @@
 #'
 #' @export
 
-PWD_resi    <- function(true, resi, epsilon=1e-5, printem=FALSE) {
+PWD_resi    <- function(true, resi, epsilon=1e-5, printem=TRUE) {
   n       <- length(true)
   absres  <- abs(resi)
   key     <- order(true)

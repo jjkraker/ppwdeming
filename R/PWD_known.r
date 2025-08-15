@@ -48,7 +48,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/PWD_known_man_example.R
+#' @example /Example/PWD_known_man_example.R
 #'
 #' @export
 

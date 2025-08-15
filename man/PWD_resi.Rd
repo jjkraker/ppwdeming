@@ -4,7 +4,7 @@
 \alias{PWD_resi}
 \title{Fit Rocke-Lorenzato profile model to residuals}
 \usage{
-PWD_resi(true, resi, epsilon=1e-5, printem=FALSE)
+PWD_resi(true, resi, epsilon=1e-5, printem=TRUE)
 }
 \arguments{
 \item{true}{the vector of values used to predict the precision – commonly X,}

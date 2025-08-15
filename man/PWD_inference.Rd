@@ -4,7 +4,7 @@
 \alias{PWD_inference}
 \title{Weighted Deming Regression -- Inference}
 \usage{
-PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE)
+PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}

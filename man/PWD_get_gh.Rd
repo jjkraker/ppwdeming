@@ -4,7 +4,7 @@
 \alias{PWD_get_gh}
 \title{Estimate of Variance Profile Functions (proportional)}
 \usage{
-PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=TRUE)
+PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}

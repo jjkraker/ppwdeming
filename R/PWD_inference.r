@@ -7,7 +7,7 @@
 #' the variance profile model.
 #'
 #' @usage
-#' PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE)
+#' PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
@@ -46,7 +46,7 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Examples/PWD_inference_man_example.R
+#' @example /Example/PWD_inference_man_example.R
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).
@@ -56,7 +56,7 @@
 #'
 #' @export
 
-PWD_inference <- function(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE) {
+PWD_inference <- function(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE) {
 
   n <- length(X)
   pseudalpha <- NULL
@@ -104,7 +104,6 @@ PWD_inference <- function(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE) {
     MoEpre  <- tcut*sqrt(sealpha^2 + (sebeta*MDL)^2 + 2*covar*MDL)
     preMDLl <- preMDL - MoEpre
     preMDLu	<- preMDL + MoEpre
-    #	print(data.frame(preMDL, preMDLl, preMDLu))
   }
   if (printem) {
     cat(sprintf("%9s %8s %8s %9s\n", "Parameter", "estimate", "se", "CI"))
