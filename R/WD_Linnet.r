@@ -34,8 +34,8 @@
 #'
 #' @example /Examples/WD_Linnet_man_example.R
 #'
-#' @references Linnet K. Evaluation of regression procedures for methods comparison studies,
-#' 1993. *Clinical Chemistry*, **39**: 424-432.
+#' @references Linnet K (1993). Evaluation of regression procedures for methods
+#' comparison studies. *Clinical Chemistry*, **39**, 424-432.
 #'
 #' @importFrom stats cor qt sd
 #'

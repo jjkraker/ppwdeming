@@ -64,8 +64,11 @@ Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
 outliers_assess <- PWD_outlier(X,Y,K=5)
 }
 \references{
-Hawkins DM. \emph{Outliers}. in Wiley Encyclopedia of Clinical Trials,
-eds R. D’Agostino, L. Sullivan, and J. Massaro. 2008. Wiley, New York.
+Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
+Regression for Methods Comparison, on \emph{Arxiv} (2025, <arxiv.org/abs/2508.02888>).
+
+Hawkins DM (2008). \emph{Outliers} in Wiley Encyclopedia of Clinical Trials,
+eds R. D’Agostino, L. Sullivan, and J. Massaro. Wiley, New York.
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}

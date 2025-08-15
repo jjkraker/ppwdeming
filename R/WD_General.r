@@ -33,8 +33,8 @@
 #'
 #' @example /Examples/WD_general_man_example.R
 #'
-#' @references Linnet K. Evaluation of regression procedures for methods comparison studies,
-#' 1993. *Clinical Chemistry*, **39**: 424-432.
+#' @references Ripley BD and Thompson M (1987). Regression techniques for the detection
+#' of analytical bias.  *Analyst*, **112**, 377-383.
 #'
 #' @export
 

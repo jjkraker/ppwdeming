@@ -76,8 +76,11 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)
 }
 \references{
-Efron, B. \emph{The jackknife, the bootstrap and other resampling plans}.
-\strong{Society for Industrial and Applied Mathematics}; 1982.
+Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
+Regression for Methods Comparison, on \emph{Arxiv} (2025, <arxiv.org/abs/2508.02888>).
+
+Efron, B (1982). The jackknife, the bootstrap and other resampling plans.
+Society for Industrial and Applied Mathematics.
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}

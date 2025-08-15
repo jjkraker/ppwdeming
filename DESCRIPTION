@@ -26,7 +26,7 @@ Description: Weighted Deming regression, also known as "errors-in-variable" regr
   normality, linearity and constant variance; and an outlier analysis identifying 
   significant outliers for closer investigation.
   Further information on mathematical derivations and applications is documented 
-  by DM Hawkins and JJ Kraker on Arxiv (2025, <arXiv:2508.02888>).
+  by DM Hawkins and JJ Kraker on Arxiv (2025, <https://arxiv.org/abs/2508.02888>).
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

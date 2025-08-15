@@ -72,8 +72,11 @@ cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
     "and kappahat=", signif(RL_gh_fit$kappa,6))
 }
 \references{
-Rocke DM, Lorenzato S, "A Two-Component Model for Measurement Error in Analytical Chemistry",
-2012.  \emph{Technometrics}, \strong{37:2}: 176-184.
+Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
+Regression for Methods Comparison, on \emph{Arxiv} (2025, <arxiv.org/abs/2508.02888>).
+
+Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement
+Error in Analytical Chemistry.  \emph{Technometrics}, \strong{37:2}:176-184.
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}

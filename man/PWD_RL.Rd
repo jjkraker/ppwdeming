@@ -74,7 +74,10 @@ cat("\nWith given sigma and kappa, the estimated intercept is",
     signif(RL_results$beta,4), "\n")
 }
 \references{
-Hawkins DM, “A Model for Assay Precision”, 2014.
+Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
+Regression for Methods Comparison, on \emph{Arxiv} (2025, <arxiv.org/abs/2508.02888>).
+
+Hawkins DM (2014). A Model for Assay Precision.
 \emph{Statistics in Biopharmaceutical Research}, \strong{6}, 263-269.
 http://dx.doi.org/10.1080/19466315.2014.899511
 }

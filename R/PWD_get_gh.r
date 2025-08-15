@@ -41,8 +41,11 @@
 #'
 #' @example /Examples/PWD_get_gh_man_example.R
 #'
-#' @references Rocke DM, Lorenzato S, "A Two-Component Model for Measurement Error in Analytical Chemistry",
-#' 2012.  *Technometrics*, **37:2**: 176-184.
+#' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
+#' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).
+#'
+#' @references Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement
+#' Error in Analytical Chemistry.  *Technometrics*, **37:2**:176-184.
 #'
 #' @importFrom stats optimize
 #'

@@ -42,7 +42,10 @@
 #'
 #' @example /Examples/PWD_resi_man_example.R
 #'
-#' @references Hawkins DM, “A Model for Assay Precision”, 2014.
+#' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
+#' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).
+#'
+#' @references Hawkins DM (2014). A Model for Assay Precision.
 #' *Statistics in Biopharmaceutical Research*, **6**, 263-269.
 #' http://dx.doi.org/10.1080/19466315.2014.899511
 #'

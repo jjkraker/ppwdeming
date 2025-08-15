@@ -65,8 +65,8 @@ cat("\nWith given g and h, the estimated intercept is",
     signif(wd_fit$beta,4), "\n")
 }
 \references{
-Linnet K. Evaluation of regression procedures for methods comparison studies,
-1993. \emph{Clinical Chemistry}, \strong{39}: 424-432.
+Ripley BD and Thompson M (1987). Regression techniques for the detection
+of analytical bias.  \emph{Analyst}, \strong{112}, 377-383.
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}

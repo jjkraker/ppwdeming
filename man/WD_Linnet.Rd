@@ -67,8 +67,8 @@ cat("\nThe Linnet constant-CV estimated intercept is",
     signif(wd_fit$beta,4), "\n")
 }
 \references{
-Linnet K. Evaluation of regression procedures for methods comparison studies,
-1993. \emph{Clinical Chemistry}, \strong{39}: 424-432.
+Linnet K (1993). Evaluation of regression procedures for methods
+comparison studies. \emph{Clinical Chemistry}, \strong{39}, 424-432.
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}
