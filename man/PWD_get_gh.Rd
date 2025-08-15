@@ -73,7 +73,7 @@ cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025, <arxiv.org/abs/2508.02888>).
+Regression for Methods Comparison, on \emph{Arxiv} (2025, \href{https://arxiv.org/abs/2508.02888}{arxiv.org/abs/2508.02888}).
 
 Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement
 Error in Analytical Chemistry.  \emph{Technometrics}, \strong{37:2}:176-184.

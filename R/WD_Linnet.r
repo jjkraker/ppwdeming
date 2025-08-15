@@ -110,7 +110,7 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
     CIa <- alpha + sealpha * c(-tcut, tcut)
     CIb <- beta  + sebeta  * c(-tcut, tcut)
     cat(sprintf("Intercept\t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", alpha, sealpha, CIa[1], CIa[2]))
-    cat(sprintf("Slope\t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", beta, sebeta, CIb[1], CIb[2]))
+    cat(sprintf("Slope  \t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", beta, sebeta, CIb[1], CIb[2]))
   }
   corXY = cor(X,Y)
   return(list(alpha=alpha, beta=beta, cor=corXY, sealpha=sealpha, sebeta=sebeta,

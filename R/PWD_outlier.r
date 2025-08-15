@@ -36,7 +36,7 @@
 #' @example /Example/PWD_outlier_man_example.R
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025, <arxiv.org/abs/2508.02888>).
+#' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
 #'
 #' @references  Hawkins DM (2008). *Outliers* in Wiley Encyclopedia of Clinical Trials,
 #' eds R. D’Agostino, L. Sullivan, and J. Massaro. Wiley, New York.

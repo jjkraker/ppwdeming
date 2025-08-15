@@ -65,7 +65,7 @@ outliers_assess <- PWD_outlier(X,Y,K=5)
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025, <arxiv.org/abs/2508.02888>).
+Regression for Methods Comparison, on \emph{Arxiv} (2025, \href{https://arxiv.org/abs/2508.02888}{arxiv.org/abs/2508.02888}).
 
 Hawkins DM (2008). \emph{Outliers} in Wiley Encyclopedia of Clinical Trials,
 eds R. D’Agostino, L. Sullivan, and J. Massaro. Wiley, New York.
