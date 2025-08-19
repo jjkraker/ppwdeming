@@ -1,6 +1,8 @@
 ^PPWDeming\.Rproj$
 ^\.Rproj\.user$
 ^LICENSE\.md$
+^LICENSE$
 ^\.github$
 ^cran-comments\.md$
+^README\.Rmd$
 ^CRAN-SUBMISSION$
