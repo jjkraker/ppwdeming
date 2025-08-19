@@ -6,7 +6,7 @@ Authors@R: c(person("Douglas M.", "Hawkins", role = "aut"),
               person("Jessica J.", "Kraker", role = c("aut", "cre"),
                      email = "krakerjj@uwec.edu"))
 Author: Douglas M. Hawkins [aut],
-  Jessica J. Kraker [cre]
+  Jessica J. Kraker [aut, cre]
 Maintainer: Jessica J. Kraker <krakerjj@uwec.edu>
 Depends: R (>= 3.6.0)
 Suggests: 

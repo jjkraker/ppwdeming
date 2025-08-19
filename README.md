@@ -19,7 +19,7 @@ profile settings.
 You can install the development version of `ppwdeming` like so:
 
 ``` r
-# install.packages("ppwdeming")  # once available on CRAN
+install.packages("ppwdeming")  # once available on CRAN
 ```
 
 ## Example
