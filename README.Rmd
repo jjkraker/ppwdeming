@@ -15,13 +15,11 @@ knitr::opts_chunk$set(
 
 # ppwdeming
 
-<!-- badges: start -->
-[![R-CMD-check](https://github.com/jjkraker/ppwdeming/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/jjkraker/ppwdeming/actions/workflows/R-CMD-check.yaml)
-<!-- badges: end -->
-
 The goal of ppwdeming is to provide functions for weighted Deming regression, using weights modeled via precision profile
 (used commonly in the realm of clinical chemistry). 
 Functions are included for implementing weights in situations of known and unknown precision profile settings.
+
+[Source code](https://github.com/jjkraker/ppwdeming) may be reviewed on GitHub.
 
 ## Installation
 
