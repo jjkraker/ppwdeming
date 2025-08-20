@@ -63,6 +63,7 @@ wd_fit <- WD_General(X,Y,g,h)
 cat("\nWith given g and h, the estimated intercept is",
     signif(wd_fit$alpha,4), "and the estimated slope is",
     signif(wd_fit$beta,4), "\n")
+
 }
 \references{
 Ripley BD and Thompson M (1987). Regression techniques for the detection

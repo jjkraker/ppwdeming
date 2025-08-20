@@ -70,6 +70,7 @@ RL_gh_fit  <- PWD_get_gh(X,Y,printem=TRUE)
 # RL precision profile estimated parameters
 cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
     "and kappahat=", signif(RL_gh_fit$kappa,6))
+
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming

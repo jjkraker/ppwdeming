@@ -70,6 +70,7 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 RL_gh_fit  <- PWD_get_gh(X,Y,printem=FALSE)
 # run the residual analysis from the model output
 post  <- PWD_resi(X, RL_gh_fit$resi, printem=TRUE)
+
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming

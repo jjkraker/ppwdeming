@@ -1,3 +1,8 @@
+# ppwdeming 1.0.3
+
+* placed examples directly into function-building files;
+* used \dontrun{} to keep runtime under 10s.
+
 # ppwdeming 1.0.2
 
 * Corrected Github address.

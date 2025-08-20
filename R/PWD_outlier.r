@@ -33,7 +33,30 @@
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
-#' @example /Example/PWD_outlier_man_example.R
+#' @examples
+#' # library
+#' library(ppwdeming)
+#'
+#' # parameter specifications
+#' sigma <- 1
+#' kappa <- 0.08
+#' alpha <- 1
+#' beta  <- 1.1
+#' true  <- 8*10^((0:99)/99)
+#' truey <- alpha+beta*true
+#' # simulate single sample - set seed for reproducibility
+#' set.seed(1039)
+#' # specifications for predicate method
+#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+#' # specifications for test method
+#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+#' # add some outliers
+#' Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
+#'
+#' # check for outliers, re-fit, and store output
+#' \dontrun{
+#' outliers_assess <- PWD_outlier(X,Y,K=5)
+#' }
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).

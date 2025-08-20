@@ -60,6 +60,7 @@ wd_fit <- WD_Linnet(X,Y,MDL=12)
 cat("\nThe Linnet constant-CV estimated intercept is",
     signif(wd_fit$alpha,4), "and the estimated slope is",
     signif(wd_fit$beta,4), "\n")
+
 }
 \references{
 Linnet K (1993). Evaluation of regression procedures for methods

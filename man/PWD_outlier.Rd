@@ -61,7 +61,10 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
 
 # check for outliers, re-fit, and store output
+\dontrun{
 outliers_assess <- PWD_outlier(X,Y,K=5)
+}
+
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming

@@ -72,6 +72,7 @@ RL_results <- PWD_RL(X,Y,sigma,kappa)
 cat("\nWith given sigma and kappa, the estimated intercept is",
     signif(RL_results$alpha,4), "and the estimated slope is",
     signif(RL_results$beta,4), "\n")
+
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming

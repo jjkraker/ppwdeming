@@ -1,5 +1,5 @@
 Package: ppwdeming
-Version: 1.0.2
+Version: 1.0.3
 Date: 2025-08-11
 Title: Precision Profile Weighted Deming Regression 
 Authors@R: c(person("Douglas M.", "Hawkins", role = "aut"),
