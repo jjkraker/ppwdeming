@@ -4,7 +4,7 @@
 \alias{PWD_inference}
 \title{Weighted Deming Regression -- Inference}
 \usage{
-PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE)
+PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}
@@ -17,7 +17,7 @@ PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE)
 
 \item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit,}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results.}
+\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -73,9 +73,7 @@ X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
 Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 
 # fit with RL precision profile to estimate parameters and variability
-\dontrun{
-RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)
-}
+\donttest{RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)}
 
 }
 \references{

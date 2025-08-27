@@ -13,7 +13,7 @@
 #' @param Y		the vector of test readings,
 #' @param lambda		*optional* (default of 1) - the ratio of the X to the Y precision profile (defaults to 1),
 #' @param epsilon		*optional* (default of 1.e-8) - convergence tolerance limit,
-#' @param printem	  *optional* - if TRUE, routine will print out results.
+#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
 #'
 #' @details
 #' This workhorse routine optimizes the likelihood in the **unknown** *g*, *h*
@@ -85,7 +85,6 @@ PWD_get_gh <- function(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE) {
   hir  <- round(2*n/3):n
   maxs <- max(abs(sY[lowr]-sX[lowr]))              # sigma
   maxk <- max(abs(log(sY[hir]/sX[hir])), na.rm=T)  # kappa
-  #  print(paste("Entering PWD_get_GH, lambda=", lambda, maxs, maxk))
   gr   <- 1.618
   a    <- 0
   b    <- maxs
@@ -119,10 +118,10 @@ PWD_get_gh <- function(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE) {
     kappa <- vd$minimum
     like    <- fd
   }
-  #  print("Done optimizing")
   do <- PWD_RL(X, Y, sigma, kappa, lambda)
   if (printem) {
-    with(do, cat(sprintf("alpha %6.3f beta %5.3f like %8.5g \n", alpha, beta, like)))
+    with(do, message(sprintf("alpha %6.3f beta %5.3f like %8.5g \n",
+                             alpha, beta, like)))
   }
   return(list(alpha=do$alpha, beta=do$beta, fity=do$fity, mu=do$mu, resi=do$resi,
               sigma=sigma, kappa=kappa, like=do$like))

@@ -5,7 +5,7 @@
 \title{Weighted Deming Regression -- general weights}
 \usage{
 PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10,
-          MDL=NA, getCI=TRUE, printem=TRUE)
+          MDL=NA, getCI=TRUE, printem=FALSE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}
@@ -26,7 +26,7 @@ PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10,
 
 \item{getCI}{\emph{optional} - allows for jackknifed standard errors on the regression and MDL,}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results.}
+\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -91,7 +91,9 @@ Y     <- truey+sqrt(h)*rnorm(100)
 
 # fit with to estimate linear parameters
 pwd_known_fit <- PWD_known(X, Y, gfun, hfun,
-                           c(4e-16, 0.07, 1.27), c(6e-2, 7e-5, 2.2))
+                           gparms=c(4e-16, 0.07, 1.27),
+                           hparms=c(6e-2, 7e-5, 2.2),
+                           printem=TRUE)
 
 }
 \author{

@@ -4,7 +4,7 @@
 \alias{PWD_resi}
 \title{Fit Rocke-Lorenzato profile model to residuals}
 \usage{
-PWD_resi(true, resi, epsilon=1e-5, printem=TRUE)
+PWD_resi(true, resi, epsilon=1e-5, printem=FALSE)
 }
 \arguments{
 \item{true}{the vector of values used to predict the precision – commonly X,}
@@ -13,7 +13,7 @@ PWD_resi(true, resi, epsilon=1e-5, printem=TRUE)
 
 \item{epsilon}{\emph{optional} (default of 1e-5) - convergence tolerance limit,}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results.}
+\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:

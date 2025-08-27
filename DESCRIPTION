@@ -1,5 +1,5 @@
 Package: ppwdeming
-Version: 1.0.3
+Version: 1.0.4
 Date: 2025-08-11
 Title: Precision Profile Weighted Deming Regression 
 Authors@R: c(person("Douglas M.", "Hawkins", role = "aut"),
@@ -27,8 +27,8 @@ Description: Weighted Deming regression, also known as "errors-in-variable"
     jackknifing); standardized-residual analysis function with regression 
     diagnostic tools for normality, linearity and constant variance; and an 
     outlier analysis identifying significant outliers for closer investigation.
-    Further information on mathematical derivations and applications is 
-    documented on arXiv (2025, <doi:10.48550/arXiv.2508.02888>).
+    Further information on mathematical derivations and applications can be 
+    found on arXiv: Hawkins and Kraker (2025) <doi:10.48550/arXiv.2508.02888>.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

@@ -5,7 +5,7 @@
 #' This routine, provided for convenience, makes Linnet’s constant CV fit.
 #'
 #' @usage
-#' WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE)
+#' WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
@@ -13,7 +13,7 @@
 #' @param MDL		optional medical decision limit(s),
 #' @param getCI		if TRUE, generates jackknife standard errors,
 #' @param epsilon		optional tolerance limit,
-#' @param printem	if TRUE, prints results.
+#' @param printem	if TRUE, prints out results as a `message`.
 #'
 #' @returns A list containing the following components:
 #'
@@ -48,7 +48,7 @@
 #' Y     <- truey *(1+kappa*rnorm(100))
 #'
 #' # fit with to estimate linear parameters
-#' wd_fit <- WD_Linnet(X,Y,MDL=12)
+#' wd_fit <- WD_Linnet(X, Y, MDL=12, printem=TRUE)
 #' cat("\nThe Linnet constant-CV estimated intercept is",
 #'     signif(wd_fit$alpha,4), "and the estimated slope is",
 #'     signif(wd_fit$beta,4), "\n")
@@ -60,7 +60,7 @@
 #'
 #' @export
 
-WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE) {
+WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE) {
   pseuda <- NULL
   pseudb <- NULL
   n      <- length(X)
@@ -128,11 +128,11 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
     preMDLu	<- preMDL + MoEpre
   }
   if (getCI & printem) {
-    cat(sprintf("Linnet weighted Deming\n\testimate\tse\tCI\n"))
+    message(sprintf("Linnet weighted Deming\n\t\test\tse\tCI\n"))
     CIa <- alpha + sealpha * c(-tcut, tcut)
     CIb <- beta  + sebeta  * c(-tcut, tcut)
-    cat(sprintf("Intercept\t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", alpha, sealpha, CIa[1], CIa[2]))
-    cat(sprintf("Slope  \t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", beta, sebeta, CIb[1], CIb[2]))
+    message(sprintf("Intercept\t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", alpha, sealpha, CIa[1], CIa[2]))
+    message(sprintf("Slope    \t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", beta, sebeta, CIb[1], CIb[2]))
   }
   corXY = cor(X,Y)
   return(list(alpha=alpha, beta=beta, cor=corXY, sealpha=sealpha, sebeta=sebeta,

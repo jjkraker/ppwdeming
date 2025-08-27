@@ -1,3 +1,17 @@
+# ppwdeming 1.0.4
+
+* revised primary reference in DESCRIPTION file to include author names and to
+  have consistent format.
+* For runnable (but >10s running) code in examples, replaced \dontrun with 
+  \donttest.  This was applied to functions: PWD_inference, PWD_outlier.
+* Removed the default console output by: 
+  (1) setting the printem to default to FALSE; and
+  (2) replacing any print()/cat() with message().
+  This was applied for: PWD_get_gh, PWD_inference, PWD_known, PWD_outlier, 
+    PWD_resi, and WD_Linnet. 
+    Relevant items are elements on the list-value of the function.
+* Replaced print() with message() and stop() for possible error in WD_General.
+
 # ppwdeming 1.0.3
 
 * placed examples directly into function-building files;

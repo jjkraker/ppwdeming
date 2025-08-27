@@ -4,7 +4,7 @@
 \alias{PWD_outlier}
 \title{Weighted Deming Regression -- Outlier scanning}
 \usage{
-PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE)
+PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, printem=FALSE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}
@@ -17,7 +17,7 @@ PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE)
 
 \item{Pcut}{\emph{optional}, default 0.01 (1\%), cutoff for statistical significance of Bonferroni P,}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results.}
+\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -61,9 +61,7 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
 
 # check for outliers, re-fit, and store output
-\dontrun{
-outliers_assess <- PWD_outlier(X,Y,K=5)
-}
+\donttest{outliers_assess <- PWD_outlier(X, Y, K=5, printem=TRUE)}
 
 }
 \references{

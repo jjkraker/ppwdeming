@@ -6,14 +6,14 @@
 #' a sanitized data set (with outliers removed).
 #'
 #' @usage
-#' PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE)
+#' PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, printem=FALSE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
 #' @param K		the maximum number of outliers to seek,
 #' @param lambda		*optional* the ratio of the X to the Y precision profile (defaults to 1),
 #' @param Pcut		*optional*, default 0.01 (1%), cutoff for statistical significance of Bonferroni P,
-#' @param printem	  *optional* - if TRUE, routine will print out results.
+#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
 #'
 #' @details
 #' The method is modeled on the Rosner sequential ESD outlier procedure and
@@ -54,9 +54,7 @@
 #' Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
 #'
 #' # check for outliers, re-fit, and store output
-#' \dontrun{
-#' outliers_assess <- PWD_outlier(X,Y,K=5)
-#' }
+#' \donttest{outliers_assess <- PWD_outlier(X, Y, K=5, printem=TRUE)}
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
@@ -68,17 +66,17 @@
 #'
 #' @export
 
-PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE) {
+PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=FALSE) {
   outlis   <- NULL
   N        <- length(X)
   keep     <- rep(TRUE, N)
   mapper   <- 1:N
-  # Forward identification of suspects
 
   if (printem) {
-    cat(sprintf("Outlier identification\nFull sample fit\n"))
+    message(sprintf("Outlier identification\nFull sample fit\n"))
     do <- PWD_inference(X, Y, lambda, printem=TRUE)
   }
+  # Forward identification of suspects
   for (m in 1:K) {
     x          <- X[keep]
     y          <- Y[keep]
@@ -107,7 +105,7 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE) {
     susp       <- mapper[inx]
 
     Bonmin     <- 2*(N-m+1)*pnorm(-maxa)
-    if (printem) cat(sprintf("Suspect %3.0f outlier Z %5.2f \n", susp, scalr[inx]))
+    if (printem) message(sprintf("Suspect %3.0f outlier Z %5.2f \n", susp, scalr[inx]))
     outlis     <- c(outlis, susp)
     keep[susp] <- FALSE
     mapper     <- mapper[-inx]
@@ -117,7 +115,7 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE) {
   do         <- PWD_get_gh(x, y, lambda)
 
   # Now do reinclusion
-  if (printem) cat(sprintf("Outlier reinclusion\n"))
+  if (printem) message(sprintf("Outlier reinclusion\n"))
   for (m in 1:K) {
     x          <- X[keep]
     y          <- Y[keep]
@@ -139,17 +137,17 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE) {
     if(printem) {
       echoit    <- data.frame(outlis, round(scalr[!keep],3), round(BonP[!keep],5))
       colnames(echoit) <- c("case", "outlier Z", "Bonferroni P")
-      print(echoit)
-      cat(sprintf("Least suspect %3.0f Z %5.3f BonP %6.4f\n", susp,minout,Bonmax))
+      message(echoit)
+      message(sprintf("Least suspect %3.0f Z %5.3f BonP %6.4f\n", susp,minout,Bonmax))
     }
 
     if (Bonmax < Pcut) {
-      if (printem) cat(sprintf("Any remaining suspects significant\n"))
+      if (printem) message(sprintf("Any remaining suspects significant\n"))
       lastpar <- c(do$sigma, do$kappa, do$alpha, do$beta, do$like)
 
       break
     }
-    cat(sprintf("Reinclude %1.0f\n", susp))
+    message(sprintf("Reinclude %1.0f\n", susp))
     keep[susp] <- TRUE      # Reinclude---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
   }
 
@@ -158,7 +156,7 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=TRUE) {
   ndrop  <- sum(!keep)
   listem <- (1:N)[!keep]
   if (ndrop > 0 & printem) {
-    cat(sprintf("\nFit to retained clean cases\n"))
+    message(sprintf("\nFit to retained clean cases\n"))
     dofir  <- PWD_inference(x, y, lambda=1, printem=TRUE)
   }
 

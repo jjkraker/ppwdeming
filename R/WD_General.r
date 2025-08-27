@@ -76,47 +76,43 @@ WD_General <- function(X, Y, g, h, epsilon=1e-10) {
   beta   <- 1
   alllik <- NULL
   if (flag) {
-    print("g h error in WD")
-    print(summary(g))
-    print(summary(h))
-    print("X")
-    print(X)
-    print("Y")
-    print(Y)
-  } else {
-    while(diff > epsilon) {# weight depends on beta, so refine.
-      innr   <- innr+1
-      w      <- 1/(h + beta^2 * g)
-      sumw   <- sum(w)
-      wsq    <- w^2
-      xbar   <- sum(w * X) / sumw
-      ybar   <- sum(w * Y) / sumw
-      devx   <- X - xbar
-      devy   <- Y - ybar
-      sxxx   <- sum(wsq * devx^2 * g)
-      sxxy   <- sum(wsq * devx^2 * h)
-      sxyx   <- sum(wsq * devx * devy * g)
-      sxyy   <- sum(wsq * devx * devy * h)
-      syyx   <- sum(wsq * devy^2 * g)
-      surd   <- (sxxy - syyx)^2 + 4 * sxyx * sxyy
-      beta   <- (syyx - sxxy + sqrt(surd)) / (2 * sxyx)
-      alpha  <- ybar - beta *  xbar
-      mu     <- w * (h * X + g * beta * (Y - alpha))
-      fity   <- alpha + beta*mu
-      resi   <- Y - alpha - beta*X
-      like   <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
-      alllik <- c(alllik, like)
-      if (like < best) {
-        best     <- like
-        besalpha <- alpha
-        besbeta  <- beta
-        besmu    <- mu
-        besresi  <- resi
-        besfity  <- fity
-      }
-      diff   <- sum((mu - old)^2) / sum(mu^2)
-      old   <- mu
+    message("There are ", sum(is.na(g)), " missing values in g.")
+    message("There are ", sum(is.na(h)), " missing values in h.")
+    stop("g h error in WD")
+  }
+  while(diff > epsilon) {# weight depends on beta, so refine.
+    innr   <- innr+1
+    w      <- 1/(h + beta^2 * g)
+    sumw   <- sum(w)
+    wsq    <- w^2
+    xbar   <- sum(w * X) / sumw
+    ybar   <- sum(w * Y) / sumw
+    devx   <- X - xbar
+    devy   <- Y - ybar
+    sxxx   <- sum(wsq * devx^2 * g)
+    sxxy   <- sum(wsq * devx^2 * h)
+    sxyx   <- sum(wsq * devx * devy * g)
+    sxyy   <- sum(wsq * devx * devy * h)
+    syyx   <- sum(wsq * devy^2 * g)
+    surd   <- (sxxy - syyx)^2 + 4 * sxyx * sxyy
+    beta   <- (syyx - sxxy + sqrt(surd)) / (2 * sxyx)
+    alpha  <- ybar - beta *  xbar
+    mu     <- w * (h * X + g * beta * (Y - alpha))
+    fity   <- alpha + beta*mu
+    resi   <- Y - alpha - beta*X
+    like   <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
+    alllik <- c(alllik, like)
+    if (like < best) {
+      best     <- like
+      besalpha <- alpha
+      besbeta  <- beta
+      besmu    <- mu
+      besresi  <- resi
+      besfity  <- fity
     }
+    diff   <- sum((mu - old)^2) / sum(mu^2)
+    old   <- mu
+
   }
   corXY = cor(X,Y)
   return(list(alpha=besalpha, beta=besbeta, cor=corXY, fity=besfity, mu=besmu,

@@ -7,7 +7,7 @@
 #'
 #' @usage
 #' PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10,
-#'           MDL=NA, getCI=TRUE, printem=TRUE)
+#'           MDL=NA, getCI=TRUE, printem=FALSE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
@@ -18,7 +18,7 @@
 #' @param MDL		*optional* medical decision level(s),
 #' @param getCI		*optional* - allows for jackknifed standard errors on the regression and MDL,
 #' @param epsilon		*optional* convergence tolerance limit,
-#' @param printem	  *optional* - if TRUE, routine will print out results.
+#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
 #'
 #' @details The functions `gfun` and `hfun` are allowed as inputs,
 #' to support flexibility in specification of the forms of these variance functions.
@@ -79,11 +79,13 @@
 #'
 #' # fit with to estimate linear parameters
 #' pwd_known_fit <- PWD_known(X, Y, gfun, hfun,
-#'                            c(4e-16, 0.07, 1.27), c(6e-2, 7e-5, 2.2))
+#'                            gparms=c(4e-16, 0.07, 1.27),
+#'                            hparms=c(6e-2, 7e-5, 2.2),
+#'                            printem=TRUE)
 #'
 #' @export
 
-PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10, MDL=NA, getCI=TRUE, printem=TRUE) {
+PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10, MDL=NA, getCI=TRUE, printem=FALSE) {
 
   alpha      <- 0
   beta       <- 1
@@ -166,19 +168,18 @@ PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10, MDL=NA, g
       preMDLl <- preMDL - MoEpre
       preMDLu	<- preMDL + MoEpre
     }
-    #	print(data.frame(preMDL, preMDLl, preMDLu))
   }
 
   if (printem) {
-    cat(sprintf("%9s %8s %8s %9s\n", "Parameter", "estimate", "se", "CI"))
+    message(sprintf("%9s %8s %8s %9s\n", "Parameter", "estimate", "se", "CI"))
     tcut <- qt(0.975, n-1)
     CI   <- fullalpha + tcut * sealpha * c(-1,1)
-    cat(sprintf("Intercept %8.3f %8.3f (%7.3f, %6.3f)\n", fullalpha, sealpha, CI[1], CI[2]))
+    message(sprintf("Intercept %8.3f %8.3f (%7.3f, %6.3f)\n", fullalpha, sealpha, CI[1], CI[2]))
     CI   <- fullbeta + tcut * sebeta * c(-1,1)
-    cat(sprintf("slope     %8.3f %8.3f (%7.3f, %6.3f)\n", fullbeta , sebeta, CI[1], CI[2]))
+    message(sprintf("slope     %8.3f %8.3f (%7.3f, %6.3f)\n", fullbeta , sebeta, CI[1], CI[2]))
     if (nMDL > 0) {
       for (kk in 1:nMDL) {
-        cat(sprintf("MDL %7.3f prediction %7.3f CI %7.3f %7.3f\n",
+        message(sprintf("MDL %7.3f prediction %7.3f CI %7.3f %7.3f\n",
                     MDL[kk], preMDL[kk], preMDLl[kk], preMDLu[kk]))
       }
     }

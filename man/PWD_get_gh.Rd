@@ -15,7 +15,7 @@ PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE)
 
 \item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit,}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results.}
+\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:

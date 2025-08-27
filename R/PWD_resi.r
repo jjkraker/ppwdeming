@@ -6,12 +6,12 @@
 #' **residuals** from the fit (via `PWD_inference`).
 #'
 #' @usage
-#' PWD_resi(true, resi, epsilon=1e-5, printem=TRUE)
+#' PWD_resi(true, resi, epsilon=1e-5, printem=FALSE)
 #'
 #' @param true  	the vector of values used to predict the precision – commonly X,
 #' @param resi		the vector of residuals whose variance is thought to be a function of “true”,
 #' @param epsilon		*optional* (default of 1e-5) - convergence tolerance limit,
-#' @param printem	  *optional* - if TRUE, routine will print out results.
+#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
 #'
 #' @details  The Rocke-Lorenzato precision profile model is
 #' \deqn{SD^2 = \sigma_r^2 + (\kappa_r\cdot true)^2}
@@ -74,7 +74,7 @@
 #'
 #' @export
 
-PWD_resi    <- function(true, resi, epsilon=1e-5, printem=TRUE) {
+PWD_resi    <- function(true, resi, epsilon=1e-5, printem=FALSE) {
   n       <- length(true)
   absres  <- abs(resi)
   key     <- order(true)
@@ -135,9 +135,9 @@ PWD_resi    <- function(true, resi, epsilon=1e-5, printem=TRUE) {
   Pvals   <- pchisq(tests, 1, lower.tail=FALSE)
   if (printem) {
     SW    <- shapiro.test(scalr)$p.value
-    cat(sprintf("Rocke-Lorenzato fit to residuals\nsigma %6.4f kappa %6.4f\n",
+    message(sprintf("Rocke-Lorenzato fit to residuals\nsigma %6.4f kappa %6.4f\n",
                 sigma, kappa))
-    cat(sprintf("P values for constant sd %6.4f cv %6.4f normality %6.4f\n",
+    message(sprintf("P values for constant sd %6.4f cv %6.4f normality %6.4f\n",
                 Pvals[1], Pvals[2], SW))
   }
 

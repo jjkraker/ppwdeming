@@ -7,14 +7,14 @@
 #' the variance profile model.
 #'
 #' @usage
-#' PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE)
+#' PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
 #' @param lambda		*optional* (default of 1) - the ratio of the X to the Y precision profile.
 #' @param MDL		    *optional* (default to missing) - medical decision level(s),
 #' @param epsilon		*optional* (default of 1.e-8) - convergence tolerance limit,
-#' @param printem	  *optional* - if TRUE, routine will print out results.
+#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
 #'
 #' @details  For the linear model relating the predicate and test readings,
 #' the standard errors of the estimators \eqn{\hat{\alpha}},
@@ -65,9 +65,7 @@
 #' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 #'
 #' # fit with RL precision profile to estimate parameters and variability
-#' \dontrun{
-#' RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)
-#' }
+#' \donttest{RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)}
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
 #' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
@@ -77,7 +75,7 @@
 #'
 #' @export
 
-PWD_inference <- function(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE) {
+PWD_inference <- function(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE) {
 
   n <- length(X)
   pseudalpha <- NULL
@@ -127,15 +125,15 @@ PWD_inference <- function(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=TRUE) {
     preMDLu	<- preMDL + MoEpre
   }
   if (printem) {
-    cat(sprintf("%9s %8s %8s %9s\n", "Parameter", "estimate", "se", "CI"))
+    message(sprintf("%9s %8s %8s %9s\n", "Parameter", "estimate", "se", "CI"))
     CI   <- fullalpha + tcut * sealpha * c(-1,1)
-    cat(sprintf("Intercept %8.3f %8.3f (%7.3f, %6.3f)\n", fullalpha, sealpha, CI[1], CI[2]))
+    message(sprintf("Intercept %8.3f %8.3f (%7.3f, %6.3f)\n", fullalpha, sealpha, CI[1], CI[2]))
     CI   <- fullbeta + tcut * sebeta * c(-1,1)
-    cat(sprintf("slope     %8.3f %8.3f (%7.3f, %6.3f)\n", fullbeta , sebeta, CI[1], CI[2]))
-    cat(sprintf("\nsigma %6.4f kappa %6.4f -2 log likelihood %7.3f\n", sigma, kappa, like))
+    message(sprintf("slope     %8.3f %8.3f (%7.3f, %6.3f)\n", fullbeta , sebeta, CI[1], CI[2]))
+    message(sprintf("\nsigma %6.4f kappa %6.4f -2 log likelihood %7.3f\n", sigma, kappa, like))
     if (nMDL > 0) {
       for (kk in 1:nMDL) {
-        cat(sprintf("MDL %7.3f prediction %7.3f CI %7.3f %7.3f\n",
+        message(sprintf("MDL %7.3f prediction %7.3f CI %7.3f %7.3f\n",
                     MDL[kk], preMDL[kk], preMDLl[kk], preMDLu[kk]))
       }
     }

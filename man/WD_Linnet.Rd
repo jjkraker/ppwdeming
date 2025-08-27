@@ -4,7 +4,7 @@
 \alias{WD_Linnet}
 \title{Linnet proportional CV weighted Deming}
 \usage{
-WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE)
+WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}
@@ -19,7 +19,7 @@ WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=TRUE)
 
 \item{epsilon}{optional tolerance limit,}
 
-\item{printem}{if TRUE, prints results.}
+\item{printem}{if TRUE, prints out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -56,7 +56,7 @@ X     <- true *(1+kappa*rnorm(100))
 Y     <- truey *(1+kappa*rnorm(100))
 
 # fit with to estimate linear parameters
-wd_fit <- WD_Linnet(X,Y,MDL=12)
+wd_fit <- WD_Linnet(X, Y, MDL=12, printem=TRUE)
 cat("\nThe Linnet constant-CV estimated intercept is",
     signif(wd_fit$alpha,4), "and the estimated slope is",
     signif(wd_fit$beta,4), "\n")
