@@ -1,4 +1,4 @@
-#' Weighted Deming Regression -- with input Rocke-Lorenzato parameters
+#' Weighted Deming -- Rocke-Lorenzato - known sigma, kappa
 #' @name PWD_RL
 #'
 #' @description
@@ -8,7 +8,7 @@
 #' sigma (\eqn{\sigma}) and kappa (\eqn{\kappa}).
 #'
 #' @usage
-#' PWD_RL(X, Y, sigma, kappa, lambda=1, epsilon=1e-10)
+#' PWD_RL(X, Y, sigma, kappa, lambda=1, epsilon=1e-6)
 #'
 #' @param X		the vector of predicate readings,
 #' @param Y		the vector of test readings,
@@ -64,15 +64,17 @@
 #'     signif(RL_results$beta,4), "\n")
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
+#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
 #'
 #' @references Hawkins DM (2014). A Model for Assay Precision.
 #' *Statistics in Biopharmaceutical Research*, **6**, 263-269.
-#' http://dx.doi.org/10.1080/19466315.2014.899511
+#' <doi:10.1080/19466315.2014.899511>
+#'
+#' @importFrom stats optim
 #'
 #' @export
 
-PWD_RL <- function(X, Y, sigma, kappa, lambda=1, epsilon=1e-10) {
+PWD_RL <- function(X, Y, sigma, kappa, lambda=1, epsilon=1e-6) {
   mu     <- X
   old    <- mu
   fity   <- mu
@@ -81,9 +83,8 @@ PWD_RL <- function(X, Y, sigma, kappa, lambda=1, epsilon=1e-10) {
   error  <- ""
   best   <- 1e20
   beta   <- 1
-  allbet <- NULL
-  alllik <- NULL
-  while((innr < 5) | (diffr > epsilon & innr < 100)) {# weight depends on beta, so refine.
+  error  <- ""
+  while(diffr > epsilon & innr < 26) {# weight depends on beta, so refine.
     innr  <- innr + 1
     g     <- lambda*(sigma^2 + (kappa*mu)^2)
     h     <- sigma^2 + (kappa*fity)^2
@@ -109,23 +110,55 @@ PWD_RL <- function(X, Y, sigma, kappa, lambda=1, epsilon=1e-10) {
     mu     <- w * (h * X + g * beta * (Y - alpha))
     fity   <- alpha + beta * mu
     resi   <- Y - alpha - beta*X
-    like   <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
-    allbet <- c(allbet, round(beta,4))
-    alllik <- c(alllik, like)
-    if (like < best) {
-      best   <- like
-      besbet <- beta
-      besalp <- alpha
-      besmu  <- mu
-      besg   <- g
-      besh   <- h
-      besfit <- fity
-      besres <- resi
-      when   <- innr
-    }
+    L      <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
     diffr <- sum((mu - old)^2) / sum(mu^2)
     old   <- mu
   }
-  return(list(alpha=besalp, beta=besbet, fity=besfit, mu=besmu, resi=besres,
-              like=best, innr=innr, error=error))
+
+  easyOK <- innr < 25
+  if (!easyOK) {          # The fast method failed.  Use optim.
+
+    getmu <- function(X, Y, sigma, kappa, lambda, alpha, beta, epsilon=1e-5) {
+      mu <- X
+      diffr <- 2*epsilon
+      looper <- 0
+      while(diffr > epsilon & looper < 100) {
+        looper <- looper + 1
+        old   <- mu
+        fity  <- alpha + beta*mu
+        g     <- lambda * (sigma^2 + (kappa*mu  )^2)
+        h     <-           sigma^2 + (kappa*fity)^2
+        mu    <- (h*X + g*beta*(Y-alpha))/(h + g*beta^2)
+        diffr <- sum((mu-old)^2)/sum(mu^2)
+      }
+
+      fity  <- alpha + beta*mu
+      g     <- lambda * (sigma^2 + (kappa*mu  )^2)
+      h     <-           sigma^2 + (kappa*fity)^2
+
+      return(list(mu=mu, g=g, h=h))
+    }
+
+    inner <- function(par) {
+      alpha <- par[1]
+      beta  <- par[2]
+      gmu   <- getmu(X, Y, sigma, kappa, lambda, alpha, beta)
+      mu    <- gmu$mu
+      g     <- gmu$g
+      h     <- gmu$h
+      fity  <- alpha + beta * mu
+      L <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
+      return(L)
+    }
+
+    dd    <- optim(c(0,1), inner)
+    alpha <- dd$par[1]
+    beta  <- dd$par[2]
+    L     <- dd$value
+    mu    <- getmu(X, Y, sigma, kappa, lambda, alpha, beta)$mu
+    fity  <- alpha + beta*mu
+    resi  <- Y - fity
+  }
+  return(list(alpha=alpha, beta=beta, fity=fity, mu=mu, resi=resi,
+              like=L))
 }

@@ -78,7 +78,7 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025, \href{https://arxiv.org/abs/2508.02888}{arxiv.org/abs/2508.02888}).
+Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
 
 Efron, B (1982). The jackknife, the bootstrap and other resampling plans.
 Society for Industrial and Applied Mathematics.

@@ -57,12 +57,13 @@
 #' \donttest{outliers_assess <- PWD_outlier(X, Y, K=5, printem=TRUE)}
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
+#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
 #'
 #' @references  Hawkins DM (2008). *Outliers* in Wiley Encyclopedia of Clinical Trials,
 #' eds R. D’Agostino, L. Sullivan, and J. Massaro. Wiley, New York.
 #'
 #' @importFrom stats pnorm
+#' @importFrom utils capture.output
 #'
 #' @export
 
@@ -135,9 +136,10 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, printem=FALSE) {
     Bonmax       <- max(BonP[!keep])
 
     if(printem) {
-      echoit    <- data.frame(outlis, round(scalr[!keep],3), round(BonP[!keep],5))
-      colnames(echoit) <- c("case", "outlier Z", "Bonferroni P")
-      message(echoit)
+      echoit    <- data.frame(outlis, X[!keep], Y[!keep],
+                              round(scalr[!keep],3), round(BonP[!keep],5))
+      colnames(echoit) <- c("case", "X", "Y", "outlier Z", "Bonferroni P")
+      message(paste0(capture.output(echoit), collapse = "\n"))
       message(sprintf("Least suspect %3.0f Z %5.3f BonP %6.4f\n", susp,minout,Bonmax))
     }
 

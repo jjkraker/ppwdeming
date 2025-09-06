@@ -2,9 +2,9 @@
 % Please edit documentation in R/PWD_RL.r
 \name{PWD_RL}
 \alias{PWD_RL}
-\title{Weighted Deming Regression -- with input Rocke-Lorenzato parameters}
+\title{Weighted Deming -- Rocke-Lorenzato - known sigma, kappa}
 \usage{
-PWD_RL(X, Y, sigma, kappa, lambda=1, epsilon=1e-10)
+PWD_RL(X, Y, sigma, kappa, lambda=1, epsilon=1e-6)
 }
 \arguments{
 \item{X}{the vector of predicate readings,}
@@ -76,11 +76,11 @@ cat("\nWith given sigma and kappa, the estimated intercept is",
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025, \href{https://arxiv.org/abs/2508.02888}{arxiv.org/abs/2508.02888}).
+Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
 
 Hawkins DM (2014). A Model for Assay Precision.
 \emph{Statistics in Biopharmaceutical Research}, \strong{6}, 263-269.
-http://dx.doi.org/10.1080/19466315.2014.899511
+\url{doi:10.1080/19466315.2014.899511}
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}

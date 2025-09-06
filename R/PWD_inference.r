@@ -68,7 +68,7 @@
 #' \donttest{RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)}
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
+#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
 #'
 #' @references  Efron, B (1982). The jackknife, the bootstrap and other resampling plans.
 #' Society for Industrial and Applied Mathematics.

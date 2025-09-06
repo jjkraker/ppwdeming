@@ -66,7 +66,7 @@ Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
 }
 \references{
 Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025, \href{https://arxiv.org/abs/2508.02888}{arxiv.org/abs/2508.02888}).
+Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
 
 Hawkins DM (2008). \emph{Outliers} in Wiley Encyclopedia of Clinical Trials,
 eds R. D’Agostino, L. Sullivan, and J. Massaro. Wiley, New York.

@@ -64,7 +64,7 @@
 #'     "and kappahat=", signif(RL_gh_fit$kappa,6))
 #'
 #' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025, [arxiv.org/abs/2508.02888](https://arxiv.org/abs/2508.02888)).
+#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
 #'
 #' @references Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement
 #' Error in Analytical Chemistry.  *Technometrics*, **37:2**:176-184.

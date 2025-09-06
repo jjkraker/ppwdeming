@@ -1,3 +1,17 @@
+# ppwdeming 1.0.6.1
+
+* Fixed output formatting for `PWD_outlier`.
+
+# ppwdeming 1.0.6
+
+* revised individual function documentation to reference arXiv document by
+arXiv DOI in format <doi:10.48550/arXiv.YYMM.NNNNN>.
+* adjusted one other doi reference correspondingly.
+
+# ppwdeming 1.0.5
+
+* updated algorithm in function `PWD_RL` to better handle rare non-convergence.
+
 # ppwdeming 1.0.4
 
 * revised primary reference in DESCRIPTION file to include author names and to
