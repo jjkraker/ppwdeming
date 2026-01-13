@@ -7,13 +7,19 @@
 #' also provides the resulting weighted Deming fit and residuals.
 #'
 #' @usage
-#' PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE)
+#' PWD_get_gh(X, Y, lambda = 1, rho=NA, alpha=NA, beta=NA, mu=NA,
+#'            epsilon = 1e-8, printem=FALSE)
 #'
-#' @param X		the vector of predicate readings,
-#' @param Y		the vector of test readings,
-#' @param lambda		*optional* (default of 1) - the ratio of the X to the Y precision profile (defaults to 1),
-#' @param epsilon		*optional* (default of 1.e-8) - convergence tolerance limit,
-#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
+#' @param X		the vector of predicate readings.
+#' @param Y		the vector of test readings.
+#' @param lambda		*optional* (default of 1) - the ratio of the `X` to
+#' the `Y` precision profile.
+#' @param rho       *optional* (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.
+#' @param alpha     *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.
+#' @param beta      *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.
+#' @param mu        *optional* (default of NA) - numeric, vector of length of `X`, initial estimate of \eqn{\mu}.
+#' @param epsilon		*optional* (default of 1.e-8) - convergence tolerance limit.
+#' @param printem	  *optional* (default of FALSE) - if TRUE, routine will print out results as a `message`.
 #'
 #' @details
 #' This workhorse routine optimizes the likelihood in the **unknown** *g*, *h*
@@ -26,6 +32,14 @@
 #'    * predicate precision profile model: \eqn{g_i = var(X_i) = \lambda\left(\sigma^2 + \left[\kappa\cdot \mu_i\right]^2\right)} and
 #'    * test precision profile model: \eqn{h_i = var(Y_i) = \sigma^2 + \left[\kappa\cdot (\alpha + \beta\mu_i)\right]^2}.
 #'
+#' The search algorithm implements an efficient approach via reparameterization
+#' to the ratio \eqn{\rho = \frac{\sigma}{\kappa}}.
+#'
+#' If initial estimates are not provided, the parameters are initialized as:
+#'    * `alpha` and `beta` are initially intercept and slope from simple linear regression;
+#'    * `rho` is initialized as the vector c(0.01, 1, 100); and
+#'    * `mu` is initialized as the values of `X`.
+#'
 #' @returns A list containing the following components:
 #'
 #'   \item{alpha }{the fitted intercept}
@@ -35,7 +49,7 @@
 #'   \item{resi }{the vector of residuals}
 #'   \item{sigma }{the estimate of the Rocke-Lorenzato \eqn{\sigma}}
 #'   \item{kappa }{the estimate of the Rocke-Lorenzato \eqn{\kappa}}
-#'   \item{like }{the -2 log likelihood L}
+#'   \item{L }{the -2 log likelihood L}
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
@@ -61,68 +75,118 @@
 #' RL_gh_fit  <- PWD_get_gh(X,Y,printem=TRUE)
 #' # RL precision profile estimated parameters
 #' cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
-#'     "and kappahat=", signif(RL_gh_fit$kappa,6))
+#'     "and kappahat=", signif(RL_gh_fit$kappa,6), "\n")
+#' # with estimated linear coefficients
+#' cat("\nalphahat=", signif(RL_gh_fit$alpha,6),
+#'     "and betahat=", signif(RL_gh_fit$beta,6), "\n")
 #'
-#' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
+#' @references Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+#' Deming Regression for Methods Comparison. *The Journal of Applied Laboratory Medicine*.
+#' <doi:10.1093/jalm/jfaf183>
 #'
 #' @references Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement
 #' Error in Analytical Chemistry.  *Technometrics*, **37:2**:176-184.
 #'
 #' @importFrom stats optimize
+#' @importFrom stats lm
+#' @importFrom stats coef
 #'
 #' @export
 
-PWD_get_gh <- function(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE) {
+PWD_get_gh <- function (X, Y, lambda = 1, rho=NA,
+                        alpha=NA, beta=NA, mu=NA, epsilon = 1e-8, printem=FALSE) {
+  whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
+  missingcases <- (1:length(X))[whichmissing]
+  allX <- X
+  allY <- Y
+  X <- X[!whichmissing]
+  Y <- Y[!whichmissing]
+  if(sum(!is.na(mu)) > 0) mu <- mu[!whichmissing]
 
-  key  <- order(X)
-  sX   <- X[key]
-  sY   <- Y[key]
-
-  # Establish search ranges
-  n    <- length(X)
-  lowr <- 1:round(n/3)
-  hir  <- round(2*n/3):n
-  maxs <- max(abs(sY[lowr]-sX[lowr]))              # sigma
-  maxk <- max(abs(log(sY[hir]/sX[hir])), na.rm=T)  # kappa
-  gr   <- 1.618
-  a    <- 0
-  b    <- maxs
-  fity <- X
-
-  innr <- function(kappa, sigma, lambda) {
-    do <- PWD_RL(X, Y, sigma, kappa, lambda)
-    return(like=do$like)
+  # inner function takes old mu, alpha, beta, g, h and gets new mu
+  getmu <- function(X, Y, alpha, beta, g, h, mu, epsilon=1e-8) {
+    diffr <- 2*epsilon
+    innr  <- 0
+    while (diffr > epsilon & innr < 100) {
+      innr <- innr + 1
+      old  <- mu
+      fity <- alpha + beta*mu
+      mu   <- (h * X + g * beta * (Y - alpha))/(h + g * beta^2)
+      diffr <- sum((mu - old)^2)/sum(mu^2)
+    }
+    return(list(mu=mu, innr=innr))
   }
 
-  h    <- maxs
-  while (h > epsilon) {
-    h        <- b - a
-    c        <- b - h / gr
-    d        <- a + h / gr
-    vc       <- optimize(innr, c(0,maxk), c, lambda)
-    fc       <- vc$objective
-    vd       <- optimize(innr, c(0,maxk), d, lambda)
-    fd       <- vd$objective
-    if (fc < fd) {
-      b <- d
-    } else {
-      a <- c
+  # calculates L from alpha, beta, sigma, kappa
+  qform   <- function(par) {
+    rho   <- par[1]
+    alpha <- par[2]
+    beta  <- par[3]
+    diffr <- 2*epsilon
+    refine <- 0
+    while(diffr > epsilon & refine < 100) {
+      refine <- refine+1
+      old <- mu
+      fity  <- alpha + beta*mu
+      resi  <- Y - alpha - beta*X
+      g     <- lambda * (rho^2 + mu^2)
+      h     <-           rho^2 + fity^2
+      mu    <- getmu(X, Y, alpha, beta, g, h, mu)$mu
+      diffr <- sum((old-mu)^2)/sum(mu^2)
+    }
+
+    W     <- sum((X-mu)^2/g+(Y-fity)^2/h)
+    slgh  <- sum(log(g*h))
+    kappa <- sqrt(W/tun)
+    sigma <- rho*kappa
+    L     <- tun*log(W) + slgh + A
+    L     <- L - 1000 * min(c(0, rho))
+    return(list(L=L, W=W, sigma=sigma, kappa=kappa, alpha=alpha,
+                beta=beta, mu=mu, fity=fity, resi=resi))
+  }
+
+  # Wrapper
+  wrapqform <- function(par) {
+    do <- qform(par)
+    do$L
+  }
+
+  # Preliminary ranging
+  if (is.na(alpha + beta)) {
+    #generate starting values
+    fitlm <- lm(Y~X)
+    alpha <- coef(fitlm)[1]
+    beta  <- coef(fitlm)[2]
+  }
+  if (any(is.na(rho)))     rho   <- c(0.01, 1, 100)
+  if (is.na(sum(mu))) mu    <- X
+
+  n     <- length(X)
+  tun   <- 2*n
+  A     <- tun * (1-log(tun))
+
+  nrho  <- length(rho)
+  best  <- 1e10
+  for (mm in 1:nrho) {
+    par   <- c(rho[mm], alpha, beta)
+    doit  <- optim(par, wrapqform)
+    L     <- doit$value
+    if (L < best) {
+      best <- L
+      bestpars <- doit$par
     }
   }
-  sigma <- c
-  kappa <- vc$minimum
-  like    <- fc
-  if (fd < fc) {
-    sigma <- d
-    kappa <- vd$minimum
-    like    <- fd
-  }
-  do <- PWD_RL(X, Y, sigma, kappa, lambda)
-  if (printem) {
-    with(do, message(sprintf("alpha %6.3f beta %5.3f like %8.5g \n",
-                             alpha, beta, like)))
-  }
-  return(list(alpha=do$alpha, beta=do$beta, fity=do$fity, mu=do$mu, resi=do$resi,
-              sigma=sigma, kappa=kappa, like=do$like))
+  wrap <- qform(bestpars)
+  resi <- Y - bestpars[2] - bestpars[3]*X
+
+  allresi = rep(NA, length(allX))
+  allresi[!whichmissing] = resi
+  allfity = rep(NA, length(allX))
+  allfity[!whichmissing] = wrap$fity
+  allmu = rep(NA, length(allX))
+  allmu[!whichmissing] = wrap$mu
+
+  return(list(alpha = bestpars[2], beta = bestpars[3], fity = allfity,
+              mu = allmu, resi = allresi, rho=wrap$sigma/wrap$kappa, sigma = wrap$sigma,
+              kappa = wrap$kappa, L = wrap$L))
 }

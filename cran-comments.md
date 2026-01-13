@@ -2,4 +2,8 @@
 
 0 errors | 0 warnings | 0 notes
 
-* This is a new release.
+* This is a major update, due to change in primary algorithm.
+
+## revdepcheck results
+
+There are no current reverse dependencies.

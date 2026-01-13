@@ -4,21 +4,27 @@
 \alias{PWD_RL}
 \title{Weighted Deming -- Rocke-Lorenzato - known sigma, kappa}
 \usage{
-PWD_RL(X, Y, sigma, kappa, lambda=1, epsilon=1e-6)
+PWD_RL(X, Y, sigma, kappa, lambda=1, alpha=NA, beta=NA, mu=NA, epsilon=1e-8)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{sigma}{the RL sigma parameter,}
+\item{sigma}{the RL \eqn{\sigma} parameter.}
 
-\item{kappa}{the RL kappa parameter,}
+\item{kappa}{the RL \eqn{\kappa} parameter.}
 
-\item{lambda}{\emph{optional} (default of 1) - the ratio of the X to
-the Y precision profile,}
+\item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to
+the \code{Y} precision profile.}
 
-\item{epsilon}{\emph{optional} - convergence tolerance limit.}
+\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
+
+\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+
+\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+
+\item{epsilon}{\emph{optional}  (default of 1e-8) - convergence tolerance limit.}
 }
 \value{
 A list containing the following components:
@@ -28,7 +34,7 @@ A list containing the following components:
 \item{fity }{the vector of predicted Y}
 \item{mu }{the vector of estimated latent true values}
 \item{resi }{the vector of residuals}
-\item{like }{the -2 log likelihood L}
+\item{L }{the -2 log likelihood L}
 \item{innr }{the number of inner refinement loops executed}
 \item{error }{an error code if the iteration fails}
 }
@@ -75,8 +81,9 @@ cat("\nWith given sigma and kappa, the estimated intercept is",
 
 }
 \references{
-Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
+Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+\url{doi:10.1093/jalm/jfaf183}
 
 Hawkins DM (2014). A Model for Assay Precision.
 \emph{Statistics in Biopharmaceutical Research}, \strong{6}, 263-269.

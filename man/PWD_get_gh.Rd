@@ -4,18 +4,28 @@
 \alias{PWD_get_gh}
 \title{Estimate of Variance Profile Functions (proportional)}
 \usage{
-PWD_get_gh(X, Y, lambda=1, epsilon=1.e-8, printem=FALSE)
+PWD_get_gh(X, Y, lambda = 1, rho=NA, alpha=NA, beta=NA, mu=NA,
+           epsilon = 1e-8, printem=FALSE)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{lambda}{\emph{optional} (default of 1) - the ratio of the X to the Y precision profile (defaults to 1),}
+\item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to
+the \code{Y} precision profile.}
 
-\item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit,}
+\item{rho}{\emph{optional} (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
+\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
+
+\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+
+\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+
+\item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit.}
+
+\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -27,7 +37,7 @@ A list containing the following components:
 \item{resi }{the vector of residuals}
 \item{sigma }{the estimate of the Rocke-Lorenzato \eqn{\sigma}}
 \item{kappa }{the estimate of the Rocke-Lorenzato \eqn{\kappa}}
-\item{like }{the -2 log likelihood L}
+\item{L }{the -2 log likelihood L}
 }
 \description{
 This code estimates the variance profiles, assumed proportional, of
@@ -45,6 +55,16 @@ That is, the assumed forms are:
 \itemize{
 \item predicate precision profile model: \eqn{g_i = var(X_i) = \lambda\left(\sigma^2 + \left[\kappa\cdot \mu_i\right]^2\right)} and
 \item test precision profile model: \eqn{h_i = var(Y_i) = \sigma^2 + \left[\kappa\cdot (\alpha + \beta\mu_i)\right]^2}.
+}
+
+The search algorithm implements an efficient approach via reparameterization
+to the ratio \eqn{\rho = \frac{\sigma}{\kappa}}.
+
+If initial estimates are not provided, the parameters are initialized as:
+\itemize{
+\item \code{alpha} and \code{beta} are initially intercept and slope from simple linear regression;
+\item \code{rho} is initialized as the vector c(0.01, 1, 100); and
+\item \code{mu} is initialized as the values of \code{X}.
 }
 }
 \examples{
@@ -69,12 +89,16 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 RL_gh_fit  <- PWD_get_gh(X,Y,printem=TRUE)
 # RL precision profile estimated parameters
 cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
-    "and kappahat=", signif(RL_gh_fit$kappa,6))
+    "and kappahat=", signif(RL_gh_fit$kappa,6), "\n")
+# with estimated linear coefficients
+cat("\nalphahat=", signif(RL_gh_fit$alpha,6),
+    "and betahat=", signif(RL_gh_fit$beta,6), "\n")
 
 }
 \references{
-Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
+Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+\url{doi:10.1093/jalm/jfaf183}
 
 Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement
 Error in Analytical Chemistry.  \emph{Technometrics}, \strong{37:2}:176-184.

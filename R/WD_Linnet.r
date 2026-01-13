@@ -5,15 +5,19 @@
 #' This routine, provided for convenience, makes Linnet’s constant CV fit.
 #'
 #' @usage
-#' WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE)
+#' WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-10, printem=FALSE)
 #'
-#' @param X		the vector of predicate readings,
-#' @param Y		the vector of test readings,
-#' @param lambda		ratio of g function to h function,
-#' @param MDL		optional medical decision limit(s),
-#' @param getCI		if TRUE, generates jackknife standard errors,
-#' @param epsilon		optional tolerance limit,
-#' @param printem	if TRUE, prints out results as a `message`.
+#' @param X		the vector of predicate readings.
+#' @param Y		the vector of test readings.
+#' @param lambda		ratio of g function to h function.
+#' @param MDL		*optional*  (default of NA) - medical decision limit(s).
+#' @param getCI	  *optional*  (default of TRUE) - 	if TRUE, generates jackknife standard errors.
+#' @param epsilon		*optional*  (default of 1e-10) -  tolerance limit.
+#' @param printem	*optional*  (default of FALSE) - if TRUE, prints out results as a `message`.
+#'
+#' @details Note that in cases where sigma happens to come out zero,
+#' Linnet’s constant CV fit differs from the precision-profile fit
+#' since the underlying precision profile models are not the same.
 #'
 #' @returns A list containing the following components:
 #'
@@ -54,15 +58,23 @@
 #'     signif(wd_fit$beta,4), "\n")
 #'
 #' @references Linnet K (1993). Evaluation of regression procedures for methods
-#' comparison studies. *Clinical Chemistry*, **39**, 424-432.
+#' comparison studies. *Clinical Chemistry*, **39**: 424-432.
 #'
 #' @importFrom stats cor qt sd
+#' @importFrom stats complete.cases
 #'
 #' @export
 
-WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE) {
-  pseuda <- NULL
-  pseudb <- NULL
+WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-10, printem=FALSE) {
+  whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
+  missingcases <- (1:length(X))[whichmissing]
+  allX <- X
+  allY <- Y
+  X <- X[!whichmissing]
+  Y <- Y[!whichmissing]
+
+  allalpha <- NULL
+  allbeta  <- NULL
   n      <- length(X)
   top    <- n
   if (!getCI) top <- 0
@@ -77,7 +89,7 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
     newY   <- y
     diff <- 2*epsilon
     while (diff > epsilon) {
-      w    <- ((x+y)/2)^(-2)
+      w    <- ((newX+newY)/2)^(-2)
       sumw <- sum(w)
       xbar <- sum(w*x)/sumw
       ybar <- sum(w*y)/sumw
@@ -96,15 +108,13 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
       diff <- sum((oldX-newX)^2+(oldY-newY)^2) / sum(oldX^2+oldY^2)
     }
     if (dele == 0) {
-      fulla <- a
-      fullb <- b
+      alpha <- a
+      beta  <- b
     } else {
-      pseuda <- c(pseuda, n*fulla - (n-1)*a)
-      pseudb <- c(pseudb, n*fullb - (n-1)*b)
+      allalpha <- c(allalpha, a)
+      allbeta  <- c(allbeta , b)
     }
   }
-  alpha   <- fulla
-  beta    <- fullb
   sealpha <- NA
   sebeta  <- NA
   covar   <- NA
@@ -116,9 +126,9 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
   tcut <- qt(0.975, n-1)
 
   if (getCI) {
-    sealpha <- sd(pseuda) / sqrt(n)
-    sebeta  <- sd(pseudb) / sqrt(n)
-    covar   <- sealpha * sebeta * cor(pseuda, pseudb)
+    sealpha <- (n-1)*sd(allalpha) / sqrt(n)
+    sebeta  <- (n-1)*sd(allbeta ) / sqrt(n)
+    covar   <- sealpha * sebeta * cor(allalpha, allbeta)
   }
   if (!is.na(sum(MDL))) {
     nMDL    <- length(MDL)
@@ -128,11 +138,12 @@ WD_Linnet <- function(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=
     preMDLu	<- preMDL + MoEpre
   }
   if (getCI & printem) {
-    message(sprintf("Linnet weighted Deming\n\t\test\tse\tCI\n"))
+    message(sprintf("Linnet weighted Deming\n\t\test\tse\tCI"))
     CIa <- alpha + sealpha * c(-tcut, tcut)
     CIb <- beta  + sebeta  * c(-tcut, tcut)
-    message(sprintf("Intercept\t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", alpha, sealpha, CIa[1], CIa[2]))
-    message(sprintf("Slope    \t%3.3f\t%3.3f\t%3.3f\t%3.3f\n", beta, sebeta, CIb[1], CIb[2]))
+    message(sprintf("Intercept\t%3.3f\t%3.3f\t%3.3f\t%3.3f", alpha, sealpha, CIa[1], CIa[2]))
+    message(sprintf("Slope    \t%3.3f\t%3.3f\t%3.3f\t%3.3f", beta, sebeta, CIb[1], CIb[2]))
+    if(sum(whichmissing) > 0) message(sprintf("\t\t Fit on n = %i complete readings", sum(!whichmissing)))
   }
   corXY = cor(X,Y)
   return(list(alpha=alpha, beta=beta, cor=corXY, sealpha=sealpha, sebeta=sebeta,

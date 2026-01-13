@@ -4,29 +4,29 @@
 \alias{WD_General}
 \title{Weighted Deming Regression}
 \usage{
-WD_General(X, Y, g, h, epsilon=1e-10)
+WD_General(X, Y, g, h, epsilon=1e-8)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{g}{the vector of variances of the X,}
+\item{g}{the vector of variances of the \code{X}.}
 
-\item{h}{the vector of variances of the Y,}
+\item{h}{the vector of variances of the \code{Y}.}
 
-\item{epsilon}{\emph{optional} convergence tolerance limit.}
+\item{epsilon}{\emph{optional}  (default of 1e-8) - convergence tolerance limit.}
 }
 \value{
 A list containing the following components:
 
 \item{alpha }{the fitted intercept}
 \item{beta }{the fitted slope}
-\item{cor }{the Pearson correlation between X and Y}
+\item{cor }{the Pearson correlation between \code{X} and \code{Y}}
 \item{fity }{the vector of predicted Y}
 \item{mu }{the vector of estimated latent true values}
 \item{resi }{the vector of residuals}
-\item{like }{the -2 log likelihood L}
+\item{L }{the -2 log likelihood L}
 \item{innr }{the number of inner refinement loops executed}
 }
 \description{
@@ -34,7 +34,9 @@ This code fits the weighted Deming regression on predicate readings (X)
 and test readings (Y).
 }
 \details{
-For input vectors \code{g} and \code{h} containing the variances of
+This function is used when the variances of X and Y are already known,
+as can be the case from an adequate number of replicate X and Y readings
+of each sample. For input vectors \code{g} and \code{h} containing the variances of
 predicate readings \code{X} and test readings \code{Y}, respectively, iteratively fits
 weighted Deming regression.
 }

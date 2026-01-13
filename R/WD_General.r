@@ -6,15 +6,17 @@
 #' and test readings (Y).
 #'
 #' @usage
-#' WD_General(X, Y, g, h, epsilon=1e-10)
+#' WD_General(X, Y, g, h, epsilon=1e-8)
 #'
-#' @param X		the vector of predicate readings,
-#' @param Y		the vector of test readings,
-#' @param g		the vector of variances of the X,
-#' @param h		the vector of variances of the Y,
-#' @param epsilon		*optional* convergence tolerance limit.
+#' @param X		the vector of predicate readings.
+#' @param Y		the vector of test readings.
+#' @param g		the vector of variances of the `X`.
+#' @param h		the vector of variances of the `Y`.
+#' @param epsilon		*optional*  (default of 1e-8) - convergence tolerance limit.
 #'
-#' @details For input vectors `g` and `h` containing the variances of
+#' @details This function is used when the variances of X and Y are already known,
+#' as can be the case from an adequate number of replicate X and Y readings
+#' of each sample. For input vectors `g` and `h` containing the variances of
 #' predicate readings `X` and test readings `Y`, respectively, iteratively fits
 #' weighted Deming regression.
 #'
@@ -22,11 +24,11 @@
 #'
 #'   \item{alpha }{the fitted intercept}
 #'   \item{beta }{the fitted slope}
-#'   \item{cor }{the Pearson correlation between X and Y}
+#'   \item{cor }{the Pearson correlation between `X` and `Y`}
 #'   \item{fity }{the vector of predicted Y}
 #'   \item{mu }{the vector of estimated latent true values}
 #'   \item{resi }{the vector of residuals}
-#'   \item{like }{the -2 log likelihood L}
+#'   \item{L }{the -2 log likelihood L}
 #'   \item{innr }{the number of inner refinement loops executed}
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
@@ -60,13 +62,24 @@
 #' @references Ripley BD and Thompson M (1987). Regression techniques for the detection
 #' of analytical bias.  *Analyst*, **112**, 377-383.
 #'
+#' @importFrom stats complete.cases
+#'
 #' @export
 
-WD_General <- function(X, Y, g, h, epsilon=1e-10) {
+WD_General <- function(X, Y, g, h, epsilon=1e-8) {
+  whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
+  missingcases <- (1:length(X))[whichmissing]
+  allX <- X
+  allY <- Y
+  X <- X[!whichmissing]
+  Y <- Y[!whichmissing]
+  g <- g[!whichmissing]
+  h <- h[!whichmissing]
+
   old    <- X
   diff   <- 2*epsilon
   flag   <- any(is.na(g+h))
-  like   <- 1e10
+  L   <- 1e10
   innr   <- 0
   n      <- length(X)
   mu     <- rep(NA, n)
@@ -100,10 +113,10 @@ WD_General <- function(X, Y, g, h, epsilon=1e-10) {
     mu     <- w * (h * X + g * beta * (Y - alpha))
     fity   <- alpha + beta*mu
     resi   <- Y - alpha - beta*X
-    like   <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
-    alllik <- c(alllik, like)
-    if (like < best) {
-      best     <- like
+    L      <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
+    alllik <- c(alllik, L)
+    if (L < best) {
+      best     <- L
       besalpha <- alpha
       besbeta  <- beta
       besmu    <- mu
@@ -115,6 +128,10 @@ WD_General <- function(X, Y, g, h, epsilon=1e-10) {
 
   }
   corXY = cor(X,Y)
+
+  allresi = rep(NA, length(allX))
+  allresi[!whichmissing] = besresi
+
   return(list(alpha=besalpha, beta=besbeta, cor=corXY, fity=besfity, mu=besmu,
-              resi=besresi, like=best, innr=innr))
+              resi=allresi, L=best, innr=innr))
 }

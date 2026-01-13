@@ -4,29 +4,29 @@
 \alias{PWD_known}
 \title{Weighted Deming Regression -- general weights}
 \usage{
-PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-10,
+PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8,
           MDL=NA, getCI=TRUE, printem=FALSE)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{gfun}{a function with two arguments, a vector of size \emph{n} and a vector of parameters,}
+\item{gfun}{a function with two arguments, a vector of size \emph{n} and a vector of parameters.}
 
-\item{hfun}{a function with two arguments, a vector of size \emph{n} and a vector of parameters,}
+\item{hfun}{a function with two arguments, a vector of size \emph{n} and a vector of parameters.}
 
-\item{gparms}{a numeric vector containing any parameters referenced by \code{gfun},}
+\item{gparms}{a numeric vector containing any parameters referenced by \code{gfun}.}
 
-\item{hparms}{a numeric vector containing any parameters referenced by \code{hfun},}
+\item{hparms}{a numeric vector containing any parameters referenced by \code{hfun}.}
 
-\item{epsilon}{\emph{optional} convergence tolerance limit,}
+\item{epsilon}{\emph{optional}  (default of 1.e-8) - convergence tolerance limit.}
 
-\item{MDL}{\emph{optional} medical decision level(s),}
+\item{MDL}{\emph{optional}  (default of NA) - medical decision level(s).}
 
-\item{getCI}{\emph{optional} - allows for jackknifed standard errors on the regression and MDL,}
+\item{getCI}{\emph{optional}  (default of TRUE) - allows for jackknifed standard errors on the regression and MDL.}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
+\item{printem}{\emph{optional}  (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -38,7 +38,7 @@ A list containing the following components:
 \item{mu }{the vector of estimated latent true values}
 \item{resi }{the vector of residuals}
 \item{scalr }{the vector of scaled residuals using the specified g and h}
-\item{like }{the -2 log likelihood L}
+\item{L }{the -2 log likelihood L}
 \item{sealpha }{the jackknife standard error of alpha}
 \item{sebeta }{the jackknife standard error of beta}
 \item{covar }{the jackknife covariance between alpha and beta}
@@ -92,7 +92,7 @@ Y     <- truey+sqrt(h)*rnorm(100)
 # fit with to estimate linear parameters
 pwd_known_fit <- PWD_known(X, Y, gfun, hfun,
                            gparms=c(4e-16, 0.07, 1.27),
-                           hparms=c(6e-2, 7e-5, 2.2),
+                           hparms=c(6e-2, 7e-5, 2.2), MDL=12,
                            printem=TRUE)
 
 }

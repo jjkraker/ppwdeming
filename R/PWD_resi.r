@@ -3,40 +3,35 @@
 #'
 #' @description
 #' This routine fits the Rocke-Lorenzato precision profile model to the
-#' **residuals** from the fit (via `PWD_inference`).
+#' **residuals** from the fit.
 #'
 #' @usage
-#' PWD_resi(true, resi, epsilon=1e-5, printem=FALSE)
+#' PWD_resi(true, resi, epsilon=1e-8, printem=FALSE)
 #'
-#' @param true  	the vector of values used to predict the precision – commonly X,
-#' @param resi		the vector of residuals whose variance is thought to be a function of “true”,
-#' @param epsilon		*optional* (default of 1e-5) - convergence tolerance limit,
-#' @param printem	  *optional* - if TRUE, routine will print out results as a `message`.
+#' @param true  	the vector of values used to predict the precision – commonly X.
+#' @param resi		the vector of residuals whose variance is thought to be a function of “true”.
+#' @param epsilon		*optional* (default of 1e-8) - convergence tolerance limit.
+#' @param printem	  *optional* (default of FALSE) - if TRUE, routine will print out results as a `message`.
 #'
 #' @details  The Rocke-Lorenzato precision profile model is
 #' \deqn{SD^2 = \sigma_r^2 + (\kappa_r\cdot true)^2}
 #' for the *residuals* from a precision-profile model fit.
 #'
-#'  Under this model, the approach for reviewing residuals is to fit a
-#'  variance profile model to the residuals \eqn{r_i} themselves.
-#'  This function includes a check for the special cases of
-#'    * constant variance (\eqn{\kappa_r=0}) - in this case,
-#'    one could switch to the simpler unweighted Deming model;
-#'    * and of constant coefficient of variation (\eqn{\sigma_r=0}) - in this case,
-#'    one could switch to the constant CV weighted Deming model.
-#'
-#'  using chi-squared tests.
+#' Under this model, the approach for reviewing residuals is to fit a
+#' variance profile model to the residuals \eqn{r_i} themselves.  The output
+#' of this function includes a maximum-likelihood estimate of the remaining
+#' parameter in the special cases of:
+#'    * constant variance (\eqn{\kappa_r} = 0); and
+#'    * constant coefficient of variation (\eqn{\sigma_r} = 0).
 #'
 #' @returns A list containing the following components:
 #'
 #'   \item{sigmar}{the estimate of \eqn{\sigma_r}}
 #'   \item{kappar}{the estimate of \eqn{\kappa_r}}
-#'   \item{like}{the likelihood}
+#'   \item{L}{the -2 log likelihood}
 #'   \item{scalr}{the scaled residuals}
-#'   \item{poolsig}{the maximum likelihood estimate of \eqn{\sigma_r} if \eqn{\kappa_r} =0}
-#'   \item{poolkap}{the maximum likelihood estimate of \eqn{\kappa_r} if \eqn{\sigma_r} =0}
-#'   \item{tests}{the chi-squared test statistics for \eqn{\kappa_r}=0 and for \eqn{\sigma_r}=0}
-#'   \item{Pvals}{the P values for the two chi-squared tests}
+#'   \item{poolsig}{the maximum likelihood estimate of \eqn{\sigma_r} if \eqn{\kappa_r} = 0}
+#'   \item{poolkap}{the maximum likelihood estimate of \eqn{\kappa_r} if \eqn{\sigma_r} = 0}
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
@@ -59,34 +54,43 @@
 #' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 #'
 #' # fit the model and store output
-#' RL_gh_fit  <- PWD_get_gh(X,Y,printem=FALSE)
+#' RL_gh_fit  <- PWD_get_gh(X,Y)
 #' # run the residual analysis from the model output
 #' post  <- PWD_resi(X, RL_gh_fit$resi, printem=TRUE)
 #'
-#' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
+#' @references Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+#' Deming Regression for Methods Comparison. *The Journal of Applied Laboratory Medicine*.
+#' <doi:10.1093/jalm/jfaf183>
 #'
 #' @references Hawkins DM (2014). A Model for Assay Precision.
 #' *Statistics in Biopharmaceutical Research*, **6**, 263-269.
 #' http://dx.doi.org/10.1080/19466315.2014.899511
 #'
 #' @importFrom stats optimize pchisq shapiro.test
+#' @importFrom stats median
+#' @importFrom stats complete.cases
 #'
 #' @export
 
-PWD_resi    <- function(true, resi, epsilon=1e-5, printem=FALSE) {
+PWD_resi    <- function(true, resi, epsilon=1e-8, printem=FALSE) {
+  whichmissing <- (!complete.cases(true)) | (!complete.cases(resi))
+  missingcases <- (1:length(true))[whichmissing]
+  alltrue <- true
+  true <- true[!whichmissing]
+  resi <- resi[!whichmissing]
+
   n       <- length(true)
   absres  <- abs(resi)
   key     <- order(true)
-  sortres <- round(absres[key],4)
+  sortres <- absres[key]
   sorttru <- true  [key]
+  ratio   <- sortres / (abs(sorttru)+epsilon)
+  cvsq    <- ratio  ^2
   vars    <- sortres^2
-  cvsq    <- (sortres/sorttru)^2
-  logcv   <- round(0.5 * log(cvsq),4)
   lowr    <- 1:round(n/3)
   hir     <- round(2*n/3):n
-  maxsig  <- max(sortres[lowr])
-  maxkap  <- 0.5*max(abs(logcv[hir]), na.rm=TRUE)
+  maxsig  <- 5*median(sortres[lowr])
+  maxkap  <- 5*median(ratio  [hir])
 
   innr     <- function(kap, sig) {
     modl   <- sig^2 + (kap*sorttru)^2
@@ -114,11 +118,11 @@ PWD_resi    <- function(true, resi, epsilon=1e-5, printem=FALSE) {
   }
   sigma <- c
   kappa <- vc$minimum
-  like  <- fc
+  L  <- fc
   if (fd < fc) {
     sigma <- d
     kappa <- vd$minimum
-    like  <- fd
+    L  <- fd
   }
 
   profl   <- sqrt(sigma^2 + (kappa*true)^2)
@@ -128,20 +132,20 @@ PWD_resi    <- function(true, resi, epsilon=1e-5, printem=FALSE) {
 
   poolsig <- sqrt(mean(vars))
   poolkap <- sqrt(mean(cvsq))
-  consdl  <- innr(0, poolsig)
-  concvl  <- innr(poolkap, 0)
-  check   <- innr(vc$minimum, c)
-  tests   <- c(consdl, concvl) - fc
-  Pvals   <- pchisq(tests, 1, lower.tail=FALSE)
+
   if (printem) {
     SW    <- shapiro.test(scalr)$p.value
-    message(sprintf("Rocke-Lorenzato fit to residuals\nsigma %6.4f kappa %6.4f\n",
+    message(sprintf("Rocke-Lorenzato fit to residuals\nsigma %6.4f kappa %6.4f",
                 sigma, kappa))
-    message(sprintf("P values for constant sd %6.4f cv %6.4f normality %6.4f\n",
-                Pvals[1], Pvals[2], SW))
+    if(sum(whichmissing) > 0) message(sprintf("\t Fit on n = %i complete residuals\n", sum(!whichmissing)))
+    message(sprintf("P value for normality %6.4f",
+                SW))
   }
 
-  return(list(sigmar=sigma, kappar=kappa, like=like, scalr=scalr,
-              poolsig=poolsig, poolkap=poolkap, tests=tests, Pvals=Pvals))
+  allscalr = rep(NA, length(alltrue))
+  allscalr[!whichmissing] = scalr
+
+  return(list(sigmar=sigma, kappar=kappa, L=L, scalr=scalr,
+              poolsig=poolsig, poolkap=poolkap))
 }
 

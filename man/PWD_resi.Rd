@@ -4,32 +4,30 @@
 \alias{PWD_resi}
 \title{Fit Rocke-Lorenzato profile model to residuals}
 \usage{
-PWD_resi(true, resi, epsilon=1e-5, printem=FALSE)
+PWD_resi(true, resi, epsilon=1e-8, printem=FALSE)
 }
 \arguments{
-\item{true}{the vector of values used to predict the precision – commonly X,}
+\item{true}{the vector of values used to predict the precision – commonly X.}
 
-\item{resi}{the vector of residuals whose variance is thought to be a function of “true”,}
+\item{resi}{the vector of residuals whose variance is thought to be a function of “true”.}
 
-\item{epsilon}{\emph{optional} (default of 1e-5) - convergence tolerance limit,}
+\item{epsilon}{\emph{optional} (default of 1e-8) - convergence tolerance limit.}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
+\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
 
 \item{sigmar}{the estimate of \eqn{\sigma_r}}
 \item{kappar}{the estimate of \eqn{\kappa_r}}
-\item{like}{the likelihood}
+\item{L}{the -2 log likelihood}
 \item{scalr}{the scaled residuals}
-\item{poolsig}{the maximum likelihood estimate of \eqn{\sigma_r} if \eqn{\kappa_r} =0}
-\item{poolkap}{the maximum likelihood estimate of \eqn{\kappa_r} if \eqn{\sigma_r} =0}
-\item{tests}{the chi-squared test statistics for \eqn{\kappa_r}=0 and for \eqn{\sigma_r}=0}
-\item{Pvals}{the P values for the two chi-squared tests}
+\item{poolsig}{the maximum likelihood estimate of \eqn{\sigma_r} if \eqn{\kappa_r} = 0}
+\item{poolkap}{the maximum likelihood estimate of \eqn{\kappa_r} if \eqn{\sigma_r} = 0}
 }
 \description{
 This routine fits the Rocke-Lorenzato precision profile model to the
-\strong{residuals} from the fit (via \code{PWD_inference}).
+\strong{residuals} from the fit.
 }
 \details{
 The Rocke-Lorenzato precision profile model is
@@ -37,16 +35,13 @@ The Rocke-Lorenzato precision profile model is
 for the \emph{residuals} from a precision-profile model fit.
 
 Under this model, the approach for reviewing residuals is to fit a
-variance profile model to the residuals \eqn{r_i} themselves.
-This function includes a check for the special cases of
+variance profile model to the residuals \eqn{r_i} themselves.  The output
+of this function includes a maximum-likelihood estimate of the remaining
+parameter in the special cases of:
 \itemize{
-\item constant variance (\eqn{\kappa_r=0}) - in this case,
-one could switch to the simpler unweighted Deming model;
-\item and of constant coefficient of variation (\eqn{\sigma_r=0}) - in this case,
-one could switch to the constant CV weighted Deming model.
+\item constant variance (\eqn{\kappa_r} = 0); and
+\item constant coefficient of variation (\eqn{\sigma_r} = 0).
 }
-
-using chi-squared tests.
 }
 \examples{
 # library
@@ -67,14 +62,15 @@ X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
 Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 
 # fit the model and store output
-RL_gh_fit  <- PWD_get_gh(X,Y,printem=FALSE)
+RL_gh_fit  <- PWD_get_gh(X,Y)
 # run the residual analysis from the model output
 post  <- PWD_resi(X, RL_gh_fit$resi, printem=TRUE)
 
 }
 \references{
-Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
+Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+\url{doi:10.1093/jalm/jfaf183}
 
 Hawkins DM (2014). A Model for Assay Precision.
 \emph{Statistics in Biopharmaceutical Research}, \strong{6}, 263-269.

@@ -4,22 +4,22 @@
 \alias{WD_Linnet}
 \title{Linnet proportional CV weighted Deming}
 \usage{
-WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-9, printem=FALSE)
+WD_Linnet(X, Y, lambda=1, MDL=NA, getCI=TRUE, epsilon=1e-10, printem=FALSE)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{lambda}{ratio of g function to h function,}
+\item{lambda}{ratio of g function to h function.}
 
-\item{MDL}{optional medical decision limit(s),}
+\item{MDL}{\emph{optional}  (default of NA) - medical decision limit(s).}
 
-\item{getCI}{if TRUE, generates jackknife standard errors,}
+\item{getCI}{\emph{optional}  (default of TRUE) -     if TRUE, generates jackknife standard errors.}
 
-\item{epsilon}{optional tolerance limit,}
+\item{epsilon}{\emph{optional}  (default of 1e-10) -  tolerance limit.}
 
-\item{printem}{if TRUE, prints out results as a \code{message}.}
+\item{printem}{\emph{optional}  (default of FALSE) - if TRUE, prints out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -36,6 +36,11 @@ A list containing the following components:
 }
 \description{
 This routine, provided for convenience, makes Linnet’s constant CV fit.
+}
+\details{
+Note that in cases where sigma happens to come out zero,
+Linnet’s constant CV fit differs from the precision-profile fit
+since the underlying precision profile models are not the same.
 }
 \examples{
 # library
@@ -64,7 +69,7 @@ cat("\nThe Linnet constant-CV estimated intercept is",
 }
 \references{
 Linnet K (1993). Evaluation of regression procedures for methods
-comparison studies. \emph{Clinical Chemistry}, \strong{39}, 424-432.
+comparison studies. \emph{Clinical Chemistry}, \strong{39}: 424-432.
 }
 \author{
 Douglas M. Hawkins, Jessica J. Kraker \href{mailto:krakerjj@uwec.edu}{krakerjj@uwec.edu}

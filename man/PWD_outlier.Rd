@@ -4,20 +4,30 @@
 \alias{PWD_outlier}
 \title{Weighted Deming Regression -- Outlier scanning}
 \usage{
-PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, printem=FALSE)
+PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA,
+            printem=FALSE)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{K}{the maximum number of outliers to seek,}
+\item{K}{the maximum number of outliers to seek.}
 
-\item{lambda}{\emph{optional} the ratio of the X to the Y precision profile (defaults to 1),}
+\item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to
+the \code{Y} precision profile.}
 
-\item{Pcut}{\emph{optional}, default 0.01 (1\%), cutoff for statistical significance of Bonferroni P,}
+\item{Pcut}{\emph{optional}, default 0.01 (1\%), cutoff for statistical significance of Bonferroni P.}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
+\item{rho}{\emph{optional} (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.}
+
+\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
+
+\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+
+\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+
+\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -26,7 +36,7 @@ A list containing the following components:
 \item{drop}{a vector of the indices of the outliers}
 \item{cor }{the Pearson correlation between X and Y}
 \item{cleancor }{the Pearson correlation between cleaned X and Y (after outliers removed)}
-\item{scalr}{the scaled residuals of all cases from the sanitized fit}
+\item{scalr}{the scaled residuals of all cases from the sanitized fit and whose normal tail areas provide the basis for the outlier P values}
 \item{keep}{logical vector identifying which cases retained in sanitized data set}
 \item{basepar}{the sigma, kappa, alpha, beta of the full data set}
 \item{lastpar}{the sigma, kappa, alpha, beta of the sanitized data set}
@@ -37,8 +47,8 @@ a sanitized data set (with outliers removed).
 }
 \details{
 The method is modeled on the Rosner sequential ESD outlier procedure and
-assumes the sample is large enough to assume normality of the predicted
-residuals.
+assumes the sample is large enough to ignore the effect of random variability
+in the parameter estimates on the distribution of the residuals.
 }
 \examples{
 # library
@@ -65,8 +75,9 @@ Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
 
 }
 \references{
-Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
+Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+\url{doi:10.1093/jalm/jfaf183}
 
 Hawkins DM (2008). \emph{Outliers} in Wiley Encyclopedia of Clinical Trials,
 eds R. D’Agostino, L. Sullivan, and J. Massaro. Wiley, New York.

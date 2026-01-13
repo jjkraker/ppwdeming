@@ -8,15 +8,18 @@
 #' sigma (\eqn{\sigma}) and kappa (\eqn{\kappa}).
 #'
 #' @usage
-#' PWD_RL(X, Y, sigma, kappa, lambda=1, epsilon=1e-6)
+#' PWD_RL(X, Y, sigma, kappa, lambda=1, alpha=NA, beta=NA, mu=NA, epsilon=1e-8)
 #'
-#' @param X		the vector of predicate readings,
-#' @param Y		the vector of test readings,
-#' @param sigma		the RL sigma parameter,
-#' @param kappa		the RL kappa parameter,
-#' @param lambda		*optional* (default of 1) - the ratio of the X to
-#' the Y precision profile,
-#' @param epsilon		*optional* - convergence tolerance limit.
+#' @param X		the vector of predicate readings.
+#' @param Y		the vector of test readings.
+#' @param sigma		the RL \eqn{\sigma} parameter.
+#' @param kappa		the RL \eqn{\kappa} parameter.
+#' @param lambda		*optional* (default of 1) - the ratio of the `X` to
+#' the `Y` precision profile.
+#' @param alpha     *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.
+#' @param beta      *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.
+#' @param mu        *optional* (default of NA) - numeric, vector of length of `X`, initial estimate of \eqn{\mu}.
+#' @param epsilon		*optional*  (default of 1e-8) - convergence tolerance limit.
 #'
 #' @details The Rocke-Lorenzato precision profile model assumes the following
 #' forms for the variances, with proportionality constant \eqn{\lambda}:
@@ -33,7 +36,7 @@
 #'   \item{fity }{the vector of predicted Y}
 #'   \item{mu }{the vector of estimated latent true values}
 #'   \item{resi }{the vector of residuals}
-#'   \item{like }{the -2 log likelihood L}
+#'   \item{L }{the -2 log likelihood L}
 #'   \item{innr }{the number of inner refinement loops executed}
 #'   \item{error }{an error code if the iteration fails}
 #'
@@ -63,102 +66,95 @@
 #'     signif(RL_results$alpha,4), "and the estimated slope is",
 #'     signif(RL_results$beta,4), "\n")
 #'
-#' @references Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-#' Regression for Methods Comparison, on *Arxiv* (2025) <doi:10.48550/arXiv.2508.02888>
+#' @references Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+#' Deming Regression for Methods Comparison. *The Journal of Applied Laboratory Medicine*.
+#' <doi:10.1093/jalm/jfaf183>
 #'
 #' @references Hawkins DM (2014). A Model for Assay Precision.
 #' *Statistics in Biopharmaceutical Research*, **6**, 263-269.
 #' <doi:10.1080/19466315.2014.899511>
 #'
 #' @importFrom stats optim
+#' @importFrom stats complete.cases
 #'
 #' @export
 
-PWD_RL <- function(X, Y, sigma, kappa, lambda=1, epsilon=1e-6) {
-  mu     <- X
-  old    <- mu
-  fity   <- mu
-  diffr  <- 2*epsilon
-  innr   <- 0
-  error  <- ""
-  best   <- 1e20
-  beta   <- 1
-  error  <- ""
-  while(diffr > epsilon & innr < 26) {# weight depends on beta, so refine.
-    innr  <- innr + 1
-    g     <- lambda*(sigma^2 + (kappa*mu)^2)
-    h     <- sigma^2 + (kappa*fity)^2
-    w     <- 1/(h + beta^2 * g)
-    sumw  <- sum(w)
-    wsq   <- w^2
-    xbar  <- sum(w * X) / sumw
-    ybar  <- sum(w * Y) / sumw
-    devx  <- X - xbar
-    devy  <- Y - ybar
-    sxxx  <- sum(wsq * devx^2 * g)
-    sxxy  <- sum(wsq * devx^2 * h)
-    sxyx  <- sum(wsq * devx * devy * g)
-    sxyy  <- sum(wsq * devx * devy * h)
-    syyx  <- sum(wsq * devy^2 * g)
-    surd  <- (sxxy - syyx)^2 + 4 * sxyx * sxyy
-    if (surd < 0) {
-      error <- "Negative surd in WD_RL"
-      break
+PWD_RL <- function(X, Y, sigma, kappa, lambda=1, alpha=NA, beta=NA, mu=NA, epsilon=1e-8) {
+  whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
+  missingcases <- (1:length(X))[whichmissing]
+  allX <- X
+  allY <- Y
+  X <- X[!whichmissing]
+  Y <- Y[!whichmissing]
+  if(sum(!is.na(mu)) > 0) mu <- mu[!whichmissing]
+
+  getmu <- function(X, Y, alpha, beta, g, h, mu, epsilon=1e-8) {
+    diffr <- 2*epsilon
+    innr  <- 0
+    while (diffr > epsilon & innr < 100) {
+      innr <- innr + 1
+      old  <- mu
+      fity <- alpha + beta*mu
+      mu   <- (h * X + g * beta * (Y - alpha))/(h + g * beta^2)
+      diffr <- sum((mu - old)^2)/sum(mu^2)
     }
-    beta   <- (syyx - sxxy + sqrt(surd)) / (2 * sxyx)
-    alpha  <- ybar - beta *  xbar
-    mu     <- w * (h * X + g * beta * (Y - alpha))
-    fity   <- alpha + beta * mu
-    resi   <- Y - alpha - beta*X
-    L      <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
-    diffr <- sum((mu - old)^2) / sum(mu^2)
-    old   <- mu
+    return(list(mu=mu, innr=innr))
   }
 
-  easyOK <- innr < 25
-  if (!easyOK) {          # The fast method failed.  Use optim.
-
-    getmu <- function(X, Y, sigma, kappa, lambda, alpha, beta, epsilon=1e-5) {
-      mu <- X
-      diffr <- 2*epsilon
-      looper <- 0
-      while(diffr > epsilon & looper < 100) {
-        looper <- looper + 1
-        old   <- mu
-        fity  <- alpha + beta*mu
-        g     <- lambda * (sigma^2 + (kappa*mu  )^2)
-        h     <-           sigma^2 + (kappa*fity)^2
-        mu    <- (h*X + g*beta*(Y-alpha))/(h + g*beta^2)
-        diffr <- sum((mu-old)^2)/sum(mu^2)
-      }
-
+  # calculates L from alpha, beta, rho
+  qform   <- function(par) {
+    alpha <- par[1]
+    beta  <- par[2]
+    diffr <- 2*epsilon
+    refine <- 0
+    while(diffr > epsilon & refine < 100) {
+      refine <- refine+1
+      old <- mu
       fity  <- alpha + beta*mu
-      g     <- lambda * (sigma^2 + (kappa*mu  )^2)
-      h     <-           sigma^2 + (kappa*fity)^2
-
-      return(list(mu=mu, g=g, h=h))
+      g     <- lambda * (rho^2 + mu^2)
+      h     <-           rho^2 + fity^2
+      mu    <- getmu(X, Y, alpha, beta, g, h, mu)$mu
+      diffr <- sum((old-mu)^2)/sum(mu^2)
     }
-
-    inner <- function(par) {
-      alpha <- par[1]
-      beta  <- par[2]
-      gmu   <- getmu(X, Y, sigma, kappa, lambda, alpha, beta)
-      mu    <- gmu$mu
-      g     <- gmu$g
-      h     <- gmu$h
-      fity  <- alpha + beta * mu
-      L <- sum((X-mu)^2/g + (Y-fity)^2/h + log(g*h))
-      return(L)
-    }
-
-    dd    <- optim(c(0,1), inner)
-    alpha <- dd$par[1]
-    beta  <- dd$par[2]
-    L     <- dd$value
-    mu    <- getmu(X, Y, sigma, kappa, lambda, alpha, beta)$mu
-    fity  <- alpha + beta*mu
-    resi  <- Y - fity
+    W     <- sum((X-mu)^2/g+(Y-fity)^2/h)
+    slgh  <- sum(log(g*h))
+    kappa <- sqrt(W/tun)
+    sigma <- rho*kappa
+    L     <- tun*log(W) + slgh + A
+    return(list(L=L, W=W, sigma=sigma, kappa=kappa, alpha=alpha,
+                beta=beta, mu=mu, fity=fity))
   }
-  return(list(alpha=alpha, beta=beta, fity=fity, mu=mu, resi=resi,
-              like=L))
+
+  # Wrapper
+  wrapqform <- function(par) {
+    do <- qform(par)
+    do$L
+  }
+
+  rho   <- sigma/(kappa+1e-6)
+  if(is.na(alpha))    alpha <- 0
+  if(is.na(beta ))    beta  <- 1
+  if (is.na(sum(mu))) mu    <- X
+
+  n     <- length(X)
+  tun   <- 2*n
+  A     <- tun * (1-log(tun))
+  par   <- c(alpha, beta)
+
+  doit  <- optim(par, wrapqform)
+
+  pars  <- doit$par
+  wrap  <- qform(pars)
+
+  resi <- Y - wrap$fity
+
+  allresi = rep(NA, length(allX))
+  allresi[!whichmissing] = resi
+  allfity = rep(NA, length(allX))
+  allfity[!whichmissing] = wrap$fity
+  allmu = rep(NA, length(allX))
+  allmu[!whichmissing] = wrap$mu
+
+  return(list(alpha = pars[1], beta = pars[2], fity = allfity,
+              mu = allmu, resi = allresi, L = wrap$L))
 }

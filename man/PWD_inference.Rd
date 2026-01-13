@@ -4,20 +4,30 @@
 \alias{PWD_inference}
 \title{Weighted Deming Regression -- Inference}
 \usage{
-PWD_inference(X, Y, lambda=1, MDL=NA, epsilon=1e-8, printem=FALSE)
+PWD_inference(X, Y, lambda=1, rho=NA, alpha=NA, beta=NA, mu=NA, MDL=NA,
+              epsilon=1e-8, printem=FALSE)
 }
 \arguments{
-\item{X}{the vector of predicate readings,}
+\item{X}{the vector of predicate readings.}
 
-\item{Y}{the vector of test readings,}
+\item{Y}{the vector of test readings.}
 
-\item{lambda}{\emph{optional} (default of 1) - the ratio of the X to the Y precision profile.}
+\item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to
+the \code{Y} precision profile.}
 
-\item{MDL}{\emph{optional} (default to missing) - medical decision level(s),}
+\item{rho}{\emph{optional} (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.}
 
-\item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit,}
+\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
 
-\item{printem}{\emph{optional} - if TRUE, routine will print out results as a \code{message}.}
+\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+
+\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+
+\item{MDL}{\emph{optional} (default to missing) - medical decision level(s).}
+
+\item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit.}
+
+\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -31,7 +41,7 @@ A list containing the following components:
 \item{preresi }{the vector of leave-one-out predicted residuals}
 \item{sigma }{the estimate of the Rocke-Lorenzato \eqn{\sigma}}
 \item{kappa }{the estimate of the Rocke-Lorenzato \eqn{\kappa}}
-\item{like }{the -2 log likelihood L}
+\item{L }{the -2 log likelihood L}
 \item{sealpha }{the jackknife standard error of alpha}
 \item{sebeta }{the jackknife standard error of beta}
 \item{covar }{the jackknife covariance between alpha and beta}
@@ -41,14 +51,14 @@ A list containing the following components:
 }
 \description{
 This routine fits the regression, uses the jackknife to get its precision,
-and optionally prints it out.  Currently implements Rocke-Lorenzato as
+and optionally prints it out.  Implements Rocke-Lorenzato as
 the variance profile model.
 }
 \details{
 For the linear model relating the predicate and test readings,
 the standard errors of the estimators \eqn{\hat{\alpha}},
 \eqn{\hat{\beta}},  and their covariance are estimated by
-the jackknife.  The estimates of the intercept and slope are output,
+the jackknife.  The point estimates of the intercept and slope are output,
 along with their standard errors and covariance.
 
 These estimates are further used
@@ -77,8 +87,9 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 
 }
 \references{
-Hawkins DM and Kraker JJ. Precision Profile Weighted Deming
-Regression for Methods Comparison, on \emph{Arxiv} (2025) \url{doi:10.48550/arXiv.2508.02888}
+Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
+Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+\url{doi:10.1093/jalm/jfaf183}
 
 Efron, B (1982). The jackknife, the bootstrap and other resampling plans.
 Society for Industrial and Applied Mathematics.
