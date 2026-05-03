@@ -6,8 +6,7 @@
 #' a sanitized data set (with outliers removed).
 #'
 #' @usage
-#' PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA,
-#'             printem=FALSE)
+#' PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA)
 #'
 #' @param X		the vector of predicate readings.
 #' @param Y		the vector of test readings.
@@ -19,7 +18,6 @@
 #' @param alpha     *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.
 #' @param beta      *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.
 #' @param mu        *optional* (default of NA) - numeric, vector of length of `X`, initial estimate of \eqn{\mu}.
-#' @param printem	  *optional* (default of FALSE) - if TRUE, routine will print out results as a `message`.
 #'
 #' @details
 #' The method is modeled on the Rosner sequential ESD outlier procedure and
@@ -33,9 +31,13 @@
 #'   \item{cor }{the Pearson correlation between X and Y}
 #'   \item{cleancor }{the Pearson correlation between cleaned X and Y (after outliers removed)}
 #'   \item{scalr}{the scaled residuals of all cases from the sanitized fit and whose normal tail areas provide the basis for the outlier P values}
-#'   \item{keep}{logical vector identifying which cases retained in sanitized data set}
 #'   \item{basepar}{the sigma, kappa, alpha, beta of the full data set}
 #'   \item{lastpar}{the sigma, kappa, alpha, beta of the sanitized data set}
+#'   \item{forward }{dataframe summarizing the forward identification of possible outliers}
+#'   \item{backward }{dataframe summarizing the backward reinclusion of cases}
+#'   \item{tee }{the t statistics of the final identified outliers}
+#'   \item{BonP }{the Bonferroni P-value of the final identified outliers}
+#'   \item{outlis }{dataframe containing the outlier cases, test statistics, and P-values}
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
@@ -51,19 +53,20 @@
 #' true  <- 8*10^((0:99)/99)
 #' truey <- alpha+beta*true
 #' # simulate single sample - set seed for reproducibility
-#' set.seed(1039)
+#' set.seed(1069)
 #' # specifications for predicate method
 #' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
 #' # specifications for test method
 #' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 #' # add some outliers
-#' Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
+#' Y[c(1,2,100)] <- Y[c(1,2,100)] + c(-10,9,-50)
 #'
 #' # check for outliers, re-fit, and store output
-#' \donttest{outliers_assess <- PWD_outlier(X, Y, K=5, printem=TRUE)}
+#' \donttest{outliers_assess <- PWD_outlier(X, Y, K=5)}
 #'
-#' @references Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
-#' Deming Regression for Methods Comparison. *The Journal of Applied Laboratory Medicine*.
+#' @references Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
+#' Deming Regression for Methods Comparison.
+#' *The Journal of Applied Laboratory Medicine*, **11**(2), 379-392.
 #' <doi:10.1093/jalm/jfaf183>
 #'
 #' @references  Hawkins DM (2008). *Outliers* in Wiley Encyclopedia of Clinical Trials,
@@ -72,11 +75,12 @@
 #' @importFrom stats pnorm
 #' @importFrom stats complete.cases
 #' @importFrom stats na.omit
+#' @importFrom stats pt
 #' @importFrom utils capture.output
 #'
 #' @export
 
-PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA, printem=FALSE) {
+PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA) {
   whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
   missingcases <- (1:length(X))[whichmissing]
   allX <- X
@@ -85,118 +89,107 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA,
   Y <- Y[!whichmissing]
   if(sum(!is.na(mu)) > 0) mu <- mu[!whichmissing]
 
-  outlis   <- NULL
-  N        <- length(X)
-  keep     <- rep(TRUE, N)
-  mapper   <- 1:N
+  N       <- length(X)
+  keep    <- rep(FALSE, N)
+  clean   <- 1:N
+  nclean  <- N
+  ndrop   <- 0
+  initlis <- NULL
+  initZ   <- NULL
 
-  # Get initial fullsample fit
-  full  <- PWD_get_gh(X, Y, lambda, rho, alpha, beta, mu)
-  alpha <- full$alpha
-  beta  <- full$beta
-  rho   <- full$rho
-  mu    <- full$mu
-  if (printem) {
-    message(sprintf("Outlier identification\nFull sample fit"))
-    do <- PWD_inference(X, Y, lambda, rho, alpha, beta, mu, printem=FALSE)
-  }
-  # Forward identification of suspects
+  do_orig <- PWD_get_gh(X, Y, lambda, rho, alpha, beta, mu)
+
   for (m in 1:K) {
-    x          <- X [keep]
-    y          <- Y [keep]
-    mud        <- mu[keep]
-    do         <- PWD_get_gh(x, y, lambda, rho, alpha, beta, mud)
-    printres   <- FALSE
+    x        <- X[clean]
+    y        <- Y[clean]
+    do       <- PWD_get_gh(x, y, lambda)
+    if (m == 1) do <- do_orig
+    printres <- FALSE
+    alpha    <- unname(do$alpha)
+    beta     <- unname(do$beta)
+    resi     <- y - alpha - beta*x
+    fitres   <- PWD_resi(x, resi)
+    sigr     <- fitres$sigmar
+    kapr     <- fitres$kappar
+    scalr    <- fitres$scalr
     if (m == 1) {
-      basepar  <- c(full$sigma, full$kappa, full$alpha, full$beta, full$L)
+      basepar  <- c(do$sigma, do$kappa, unname(do$alpha), unname(do$beta), do$like)
       lastpar  <- basepar                 # If there are no outliers
-      printres <- TRUE & printem
+      cor      <- cor(X,Y)
+      allscalr <- scalr
     }
-
-    rho        <- do$rho
-    alpha      <- do$alpha
-    beta       <- do$beta
-    mu         <- do$mu
-    resi       <- y - alpha - beta*x
-
-    fitres     <- PWD_resi(x, resi, printem=printres)
-    sigr       <- fitres$sigmar
-    kapr       <- fitres$kappar
-    scalr      <- fitres$scalr
-
-    profl      <- resi/scalr
-    ascal      <- abs(scalr)
-    maxa       <- max(ascal)
-    inx        <- (1:N)[ascal == max(ascal)][1]
-    susp       <- mapper[inx]
-
-    Bonmin     <- 2*(N-m+1)*pnorm(-maxa)
-    if (printem) message(sprintf("Suspect %3.0f outlier Z %5.2f ", susp, scalr[inx]))
-    outlis     <- c(outlis, susp)
-    keep[susp] <- FALSE
-    mapper     <- mapper[-inx]
+    meanr    <- mean(scalr)
+    sdr      <- sd(scalr)
+    Z        <- (scalr-meanr)/sdr
+    whereis  <- (1:nclean)[abs(Z) == max(abs(Z))][1]
+    idof     <- clean[ whereis]
+    clean    <- clean[-whereis]
+    nclean   <- nclean-1
+    drop     <- c(drop, idof)
+    ndrop    <- ndrop+1
+    maxZ     <- Z[whereis]
+    initlis  <- c(initlis, idof)
+    initZ    <- c(initZ, maxZ)
   }
-  x          <- X[keep]
-  y          <- Y[keep]
-  do         <- PWD_get_gh(x, y, lambda, rho, alpha, beta, mud)
 
-  # Now do reinclusion
-  if (printem) message(sprintf("\nOutlier reinclusion"))
+  drop       <- initlis
+  backlis    <- NULL
+  backP      <- NULL
   for (m in 1:K) {
-    x          <- X[keep]
-    y          <- Y[keep]
-    do         <- PWD_get_gh(x, y, lambda, rho, alpha, beta, mud)
-    sigr       <- fitres$sigmar
-    kapr       <- fitres$kappar
-    alpha      <- do$alpha
-    beta       <- do$beta
-
-    resis      <- Y - alpha - beta*X
-    profl      <- sqrt(sigr^2 + (beta*kapr*X)^2)
-    scalr      <- resis/profl
-    BonP       <- 2*(N-m+1)*pnorm(-abs(scalr))
-    outlis     <- (1:N)[!keep]
-    minout     <- min(abs(scalr[!keep]))
-    susp       <- (1:N)[!keep & abs(scalr) == minout]
-    Bonmax     <- max(BonP[!keep])
-
-    if(printem) {
-      echoit  <- data.frame(outlis, X[!keep], Y[!keep],
-                            round(scalr[!keep],3), round(BonP[!keep],5))
-      colnames(echoit) <- c("case", "X", "Y", "outlier Z", "Bonferroni P")
-      message(paste0(capture.output(echoit), collapse = "\n"))
-      message(sprintf("Least suspect %3.0f Z %5.3f BonP %6.4f", susp,minout,Bonmax))
-    }
-
-    if (Bonmax < Pcut) {
-      if (printem) message(sprintf("Any remaining suspects significant"))
-      lastpar <- c(do$sigma, do$kappa, do$alpha, do$beta, do$L)
-
+    x         <- X[clean]
+    y         <- Y[clean]
+    do        <- PWD_get_gh(x, y, lambda)
+    alpha     <- unname(do$alpha)
+    beta      <- unname(do$beta)
+    resi      <- y - alpha - beta*x
+    fitres    <- PWD_resi(x, resi)
+    sigr      <- fitres$sigmar
+    kapr      <- fitres$kappar
+    scalr     <- fitres$scalr
+    meanr     <- mean(scalr)
+    sdr       <- sd(scalr)
+    fitsusp   <- alpha + beta*X[drop]
+    resisusp  <- Y[drop] - fitsusp
+    profl     <- sqrt(sigr^2 + (kapr*fitsusp)^2)
+    scalrsusp <- resisusp/profl
+    tee       <- sqrt((nclean-1)/nclean) * (scalrsusp-meanr)/sdr
+    rawp      <- pt(-abs(tee), nclean-1)
+    BonP      <- 2*(nclean+1)*rawp
+    maxbon    <- max(BonP)
+    whereis   <- (1:ndrop)[BonP == maxbon][1]
+    teeof     <- tee [whereis]
+    idof      <- drop[whereis]
+    backlis <- c(backlis, idof)
+    backP   <- c(backP, maxbon)
+    if (maxbon < Pcut) {
+      lastpar <- c(do$sigma, do$kappa, unname(do$alpha), unname(do$beta), do$like)
       break
     }
-    if (printem) message(sprintf("Reinclude %1.0f\n", susp))
-    keep[susp] <- TRUE      # Reinclude----
+    drop    <- drop[-whereis]
+    clean   <- c(clean, idof)
+    nclean  <- nclean+1
+    ndrop   <- ndrop-1
   }
 
-  # End reinclusions
-
-  ndrop  <- sum(!keep)
-  listem <- (1:N)[!keep]
-  if (ndrop > 0 & printem) {
-    message(sprintf("\nFit to retained clean cases"))
-    dofir  <- PWD_inference(x, y, lambda=1, rho, alpha, beta, mu[keep], printem=TRUE)
-    if(sum(whichmissing) > 0) message(sprintf("\t\t From among n = %i complete readings", sum(!whichmissing)))
+  cleancor    <- cor(X[clean], Y[clean])
+  keep[clean] <- TRUE
+  if (ndrop > 0) {
+    allscalr[clean] <- scalr
+    allscalr[drop ] <- scalrsusp
+  }
+  forward <- data.frame(initlis, round(initZ,3))
+  colnames(forward) <- c("case","Z")
+  backward <- data.frame(backlis, backP)
+  colnames(backward) <- c("case", "Bonf P")
+  outlis <- NA
+  if (ndrop > 0) {
+    outlis   <- data.frame(drop, X[drop], Y[drop], round(tee,3), signif(BonP, 5))
+    colnames(outlis) <- c("case", "X", "Y", "t", "Bonf P")
   }
 
-  corXY = cor(X,Y)
-  cleancorxy = cor(x,y)
-
-  allscalr = rep(NA, length(allX))
-  allscalr[!whichmissing] = scalr
-  allkeep = rep(NA, length(allX))
-  allkeep[!whichmissing] = keep
-  alllistem <- as.numeric(na.omit((1:length(allX))[!allkeep]))
-
-  return(list(ndrop=ndrop, drop=alllistem, cor=corXY, cleancor=cleancorxy, scalr=allscalr,
-              keep=allkeep, basepar=as.numeric(basepar[1:4]), lastpar=as.numeric(lastpar[1:4])))
+  return(list(ndrop=ndrop, drop=drop, cor=cor,
+              cleancor=cleancor,
+              scalr=allscalr, basepar=basepar, lastpar=lastpar,
+              forward=forward, backward=backward,
+              tee=tee, BonP=BonP, outlis=outlis))
 }

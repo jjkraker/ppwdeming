@@ -66,8 +66,9 @@
 #'     signif(RL_results$alpha,4), "and the estimated slope is",
 #'     signif(RL_results$beta,4), "\n")
 #'
-#' @references Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
-#' Deming Regression for Methods Comparison. *The Journal of Applied Laboratory Medicine*.
+#' @references Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
+#' Deming Regression for Methods Comparison.
+#' *The Journal of Applied Laboratory Medicine*, **11**(2), 379-392.
 #' <doi:10.1093/jalm/jfaf183>
 #'
 #' @references Hawkins DM (2014). A Model for Assay Precision.

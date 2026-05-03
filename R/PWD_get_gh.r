@@ -80,8 +80,9 @@
 #' cat("\nalphahat=", signif(RL_gh_fit$alpha,6),
 #'     "and betahat=", signif(RL_gh_fit$beta,6), "\n")
 #'
-#' @references Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
-#' Deming Regression for Methods Comparison. *The Journal of Applied Laboratory Medicine*.
+#' @references Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
+#' Deming Regression for Methods Comparison.
+#' *The Journal of Applied Laboratory Medicine*, **11**(2), 379-392.
 #' <doi:10.1093/jalm/jfaf183>
 #'
 #' @references Rocke DM, Lorenzato S (2012). A Two-Component Model for Measurement

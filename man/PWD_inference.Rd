@@ -87,8 +87,9 @@ Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 
 }
 \references{
-Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
-Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
+Deming Regression for Methods Comparison.
+\emph{The Journal of Applied Laboratory Medicine}, \strong{11}(2), 379-392.
 \url{doi:10.1093/jalm/jfaf183}
 
 Efron, B (1982). The jackknife, the bootstrap and other resampling plans.

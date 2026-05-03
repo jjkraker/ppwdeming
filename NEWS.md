@@ -1,3 +1,13 @@
+# ppwdeming 2.1.0
+
+* Correction to the storage in PWD_outlier function, leading to slightly different
+  z-scores in the output.
+* Output to PWD_outlier function was adjusted to include a dataframe element
+  with more easily-readable output.  
+* The option to print (via the printem argument) during the function application
+  was thus removed for simplicity.
+* Updated the primary reference to the now-known publication date.
+
 # ppwdeming 2.0.0
 
 * Sizable update, refining functions to operate more efficiently.

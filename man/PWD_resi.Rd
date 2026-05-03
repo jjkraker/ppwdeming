@@ -68,8 +68,9 @@ post  <- PWD_resi(X, RL_gh_fit$resi, printem=TRUE)
 
 }
 \references{
-Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
-Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
+Deming Regression for Methods Comparison.
+\emph{The Journal of Applied Laboratory Medicine}, \strong{11}(2), 379-392.
 \url{doi:10.1093/jalm/jfaf183}
 
 Hawkins DM (2014). A Model for Assay Precision.

@@ -4,8 +4,7 @@
 \alias{PWD_outlier}
 \title{Weighted Deming Regression -- Outlier scanning}
 \usage{
-PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA,
-            printem=FALSE)
+PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA)
 }
 \arguments{
 \item{X}{the vector of predicate readings.}
@@ -26,8 +25,6 @@ the \code{Y} precision profile.}
 \item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
 
 \item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
-
-\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
 }
 \value{
 A list containing the following components:
@@ -37,9 +34,13 @@ A list containing the following components:
 \item{cor }{the Pearson correlation between X and Y}
 \item{cleancor }{the Pearson correlation between cleaned X and Y (after outliers removed)}
 \item{scalr}{the scaled residuals of all cases from the sanitized fit and whose normal tail areas provide the basis for the outlier P values}
-\item{keep}{logical vector identifying which cases retained in sanitized data set}
 \item{basepar}{the sigma, kappa, alpha, beta of the full data set}
 \item{lastpar}{the sigma, kappa, alpha, beta of the sanitized data set}
+\item{forward }{dataframe summarizing the forward identification of possible outliers}
+\item{backward }{dataframe summarizing the backward reinclusion of cases}
+\item{tee }{the t statistics of the final identified outliers}
+\item{BonP }{the Bonferroni P-value of the final identified outliers}
+\item{outlis }{dataframe containing the outlier cases, test statistics, and P-values}
 }
 \description{
 This function tests for outliers from the fitted regression, and refits on
@@ -62,21 +63,22 @@ beta  <- 1.1
 true  <- 8*10^((0:99)/99)
 truey <- alpha+beta*true
 # simulate single sample - set seed for reproducibility
-set.seed(1039)
+set.seed(1069)
 # specifications for predicate method
 X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
 # specifications for test method
 Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
 # add some outliers
-Y[c(1,2,100)] <- Y[c(1,2,100)] + c(7,4,-45)
+Y[c(1,2,100)] <- Y[c(1,2,100)] + c(-10,9,-50)
 
 # check for outliers, re-fit, and store output
-\donttest{outliers_assess <- PWD_outlier(X, Y, K=5, printem=TRUE)}
+\donttest{outliers_assess <- PWD_outlier(X, Y, K=5)}
 
 }
 \references{
-Hawkins DM and Kraker JJ (in press). Precision Profile Weighted
-Deming Regression for Methods Comparison. \emph{The Journal of Applied Laboratory Medicine}.
+Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
+Deming Regression for Methods Comparison.
+\emph{The Journal of Applied Laboratory Medicine}, \strong{11}(2), 379-392.
 \url{doi:10.1093/jalm/jfaf183}
 
 Hawkins DM (2008). \emph{Outliers} in Wiley Encyclopedia of Clinical Trials,
