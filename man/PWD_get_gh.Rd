@@ -4,8 +4,12 @@
 \alias{PWD_get_gh}
 \title{Estimate of Variance Profile Functions (proportional)}
 \usage{
-PWD_get_gh(X, Y, lambda = 1, rho=NA, alpha=NA, beta=NA, mu=NA,
-           epsilon = 1e-8, printem=FALSE)
+PWD_get_gh(X, Y, lambda = 1,
+           rho=lifecycle::deprecated(),
+           alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+           mu=lifecycle::deprecated(),
+           quad=FALSE, epsilon = 1e-8,
+           printem=lifecycle::deprecated())
 }
 \arguments{
 \item{X}{the vector of predicate readings.}
@@ -15,23 +19,28 @@ PWD_get_gh(X, Y, lambda = 1, rho=NA, alpha=NA, beta=NA, mu=NA,
 \item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to
 the \code{Y} precision profile.}
 
-\item{rho}{\emph{optional} (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.}
+\item{rho}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{rho = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
+\item{alpha}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{alpha = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+\item{beta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{beta = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+\item{mu}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{mu = numvector} initialization is no longer implemented in algorithm.}
+
+\item{quad}{\emph{optional} (default of FALSE) - logical, selects fitting a linear or a quadratic regression.}
 
 \item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit.}
 
-\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
+\item{printem}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{printem = TRUE} is no
+longer supported; separate summary functions are provided for printing output.}
 }
 \value{
 A list containing the following components:
 
 \item{alpha }{the fitted intercept}
 \item{beta }{the fitted slope}
+\item{gamma}{the fitted coefficient of the square: if quad is FALSE, the value is zero}
+\item{quad}{logical, FALSE for linear or TRUE for quadratic regression}
 \item{fity }{the vector of predicted Y}
 \item{mu }{the vector of estimated latent true values}
 \item{resi }{the vector of residuals}
@@ -46,10 +55,11 @@ also provides the resulting weighted Deming fit and residuals.
 }
 \details{
 This workhorse routine optimizes the likelihood in the \strong{unknown} \emph{g}, \emph{h}
-setting over its \emph{n}+4 parameters
-(the two Rocke-Lorenzato precision profile parameters \eqn{\sigma}
-and \eqn{\kappa}, the intercept \eqn{\alpha} and slope \eqn{\beta},
-and the \emph{n} latent true concentrations \eqn{\mu_i}).
+setting over its \emph{n}+4 or \emph{n}+5 parameters:
+the two Rocke-Lorenzato precision profile parameters \eqn{\sigma}
+and \eqn{\kappa}, the intercept \eqn{\alpha} and slope \eqn{\beta}
+(and coefficien of the squared term \eqn{\gamma}, if quadratic),
+and the \emph{n} latent true concentrations \eqn{\mu_i}.
 
 That is, the assumed forms are:
 \itemize{
@@ -59,40 +69,36 @@ That is, the assumed forms are:
 
 The search algorithm implements an efficient approach via reparameterization
 to the ratio \eqn{\rho = \frac{\sigma}{\kappa}}.
-
-If initial estimates are not provided, the parameters are initialized as:
-\itemize{
-\item \code{alpha} and \code{beta} are initially intercept and slope from simple linear regression;
-\item \code{rho} is initialized as the vector c(0.01, 1, 100); and
-\item \code{mu} is initialized as the values of \code{X}.
-}
 }
 \examples{
 # library
 library(ppwdeming)
 
 # parameter specifications
+n <- 100
+
+quad  <- FALSE   # for a linear fit
+quad  <- TRUE    # for a quadratic fit
 sigma <- 1
 kappa <- 0.08
 alpha <- 1
 beta  <- 1.1
-true  <- 8*10^((0:99)/99)
-truey <- alpha+beta*true
+gamma <- 0
+if (quad) gamma <- -0.005
+true  <- 8*10^((0:(n-1))/(n-1))
+truey <- alpha+beta*true+gamma*true^2
 # simulate single sample - set seed for reproducibility
 set.seed(1039)
 # specifications for predicate method
-X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 # specifications for test method
-Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 
 # fit with RL precision profile to estimate parameters
-RL_gh_fit  <- PWD_get_gh(X,Y,printem=TRUE)
-# RL precision profile estimated parameters
-cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
-    "and kappahat=", signif(RL_gh_fit$kappa,6), "\n")
-# with estimated linear coefficients
-cat("\nalphahat=", signif(RL_gh_fit$alpha,6),
-    "and betahat=", signif(RL_gh_fit$beta,6), "\n")
+RL_gh_fit  <- PWD_get_gh(X,Y, quad=quad)
+
+# results
+summary(RL_gh_fit)
 
 }
 \references{

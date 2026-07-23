@@ -1,3 +1,30 @@
+# ppwdeming 3.0.0
+
+* this is a **MAJOR UPDATE**: after exhaustive testing, replacing old (linear) 
+  algorithm with new (quadratic) algorithm performs slightly differently, but
+  generally gets closer to optimum.
+* Added various functions for multi-instrument analyses: 
+  multi_PWD_inf, multi_PWD_inner, multi_PWD_out, multi_PWD
+* Added reference to arXiv for multi_ functions:
+  Hawkins DM and Kraker JJ. Multiple Instrument Methods Comparison
+  by Precision weighted Deming Regression,
+  on *Arxiv* (2026) <doi:10.48550/arXiv.2607.11776>
+* Removed printem output for each of:
+  PWD_get_gh, PWD_inference, PWD_known, PWD_resi
+* Added `lifecycle` deprecation badge and warning to each of the corresponding functions 
+  (PWD_get_gh, PWD_inference, PWD_known, PWD_resi) for `printem` argument, 
+  as per https://lifecycle.r-lib.org/articles/communicate.html#arguments
+* Added summary() function for: 
+  PWD_inference and multi_PWD_inf --> summary.pwdinf(); 
+  PWD_known --> summary.pwdknown();
+  PWD_resi --> summary.pwdresi();
+  PWD_outlier and multi_PWD_out --> summary.pwdgetgh()
+  PWD_get_gh and multi_PWD --> summary.pwdout()
+* Added `lifecycle` deprecation badge and warning to each of the corresponding functions 
+  (PWD_RL, PWD_get_gh, PWD_inference, PWD_outlier), as per
+  https://lifecycle.r-lib.org/articles/communicate.html#arguments,
+  to deprecate rho, alpha, beta, mu arguments; no longer used.
+
 # ppwdeming 2.1.0
 
 * Correction to the storage in PWD_outlier function, leading to slightly different
