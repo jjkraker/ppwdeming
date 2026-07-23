@@ -4,7 +4,8 @@
 \alias{PWD_resi}
 \title{Fit Rocke-Lorenzato profile model to residuals}
 \usage{
-PWD_resi(true, resi, epsilon=1e-8, printem=FALSE)
+PWD_resi(true, resi, epsilon=1e-8,
+         printem=lifecycle::deprecated())
 }
 \arguments{
 \item{true}{the vector of values used to predict the precision – commonly X.}
@@ -13,7 +14,8 @@ PWD_resi(true, resi, epsilon=1e-8, printem=FALSE)
 
 \item{epsilon}{\emph{optional} (default of 1e-8) - convergence tolerance limit.}
 
-\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
+\item{printem}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{printem = TRUE} is no
+longer supported; separate summary functions are provided for printing output.}
 }
 \value{
 A list containing the following components:
@@ -48,23 +50,26 @@ parameter in the special cases of:
 library(ppwdeming)
 
 # parameter specifications
+n <- 100
+
 sigma <- 1
 kappa <- 0.08
 alpha <- 1
 beta  <- 1.1
-true  <- 8*10^((0:99)/99)
+true  <- 8*10^((0:(n-1))/(n-1))
 truey <- alpha+beta*true
 # simulate single sample - set seed for reproducibility
 set.seed(1039)
 # specifications for predicate method
-X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 # specifications for test method
-Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 
 # fit the model and store output
 RL_gh_fit  <- PWD_get_gh(X,Y)
 # run the residual analysis from the model output
-post  <- PWD_resi(X, RL_gh_fit$resi, printem=TRUE)
+post  <- PWD_resi(X, RL_gh_fit$resi)
+summary(post)
 
 }
 \references{
