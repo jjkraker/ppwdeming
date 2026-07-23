@@ -4,7 +4,11 @@
 \alias{PWD_outlier}
 \title{Weighted Deming Regression -- Outlier scanning}
 \usage{
-PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA)
+PWD_outlier(X, Y, K, lambda=1, Pcut=0.01,
+            rho=lifecycle::deprecated(),
+            alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+            mu=lifecycle::deprecated(),
+            quad=FALSE)
 }
 \arguments{
 \item{X}{the vector of predicate readings.}
@@ -18,13 +22,15 @@ the \code{Y} precision profile.}
 
 \item{Pcut}{\emph{optional}, default 0.01 (1\%), cutoff for statistical significance of Bonferroni P.}
 
-\item{rho}{\emph{optional} (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.}
+\item{rho}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{rho = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
+\item{alpha}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{alpha = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+\item{beta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{beta = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+\item{mu}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{mu = numvector} initialization is no longer implemented in algorithm.}
+
+\item{quad}{\emph{optional} (default of FALSE) - logical, selects fitting a linear or a quadratic regression.}
 }
 \value{
 A list containing the following components:
@@ -34,8 +40,8 @@ A list containing the following components:
 \item{cor }{the Pearson correlation between X and Y}
 \item{cleancor }{the Pearson correlation between cleaned X and Y (after outliers removed)}
 \item{scalr}{the scaled residuals of all cases from the sanitized fit and whose normal tail areas provide the basis for the outlier P values}
-\item{basepar}{the sigma, kappa, alpha, beta of the full data set}
-\item{lastpar}{the sigma, kappa, alpha, beta of the sanitized data set}
+\item{basepar}{the sigma, kappa, alpha, beta, gamma of the full data set}
+\item{lastpar}{the sigma, kappa, alpha, beta, gamma of the sanitized data set}
 \item{forward }{dataframe summarizing the forward identification of possible outliers}
 \item{backward }{dataframe summarizing the backward reinclusion of cases}
 \item{tee }{the t statistics of the final identified outliers}
@@ -56,23 +62,28 @@ in the parameter estimates on the distribution of the residuals.
 library(ppwdeming)
 
 # parameter specifications
+n <- 100
+
 sigma <- 1
 kappa <- 0.08
 alpha <- 1
 beta  <- 1.1
-true  <- 8*10^((0:99)/99)
+true  <- 8*10^((0:(n-1))/(n-1))
 truey <- alpha+beta*true
 # simulate single sample - set seed for reproducibility
 set.seed(1069)
 # specifications for predicate method
-X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 # specifications for test method
-Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 # add some outliers
 Y[c(1,2,100)] <- Y[c(1,2,100)] + c(-10,9,-50)
 
-# check for outliers, re-fit, and store output
-\donttest{outliers_assess <- PWD_outlier(X, Y, K=5)}
+# check for outliers and store output
+outliers_assess <- PWD_outlier(X, Y, K=5)
+
+# summary of process
+summary(outliers_assess)
 
 }
 \references{

@@ -2,38 +2,47 @@
 % Please edit documentation in R/PWD_inference.r
 \name{PWD_inference}
 \alias{PWD_inference}
-\title{Weighted Deming Regression -- Inference}
+\title{Precision-Profile Weighted Deming Regression -- Inference}
 \usage{
-PWD_inference(X, Y, lambda=1, rho=NA, alpha=NA, beta=NA, mu=NA, MDL=NA,
-              epsilon=1e-8, printem=FALSE)
+PWD_inference(X, Y, lambda=1,
+              rho=lifecycle::deprecated(),
+              alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+              mu=lifecycle::deprecated(),
+              MDL=NA,
+              quad=FALSE, epsilon=1e-8,
+              printem=lifecycle::deprecated())
 }
 \arguments{
 \item{X}{the vector of predicate readings.}
 
 \item{Y}{the vector of test readings.}
 
-\item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to
-the \code{Y} precision profile.}
+\item{lambda}{\emph{optional} (default of 1) - the ratio of the \code{X} to the \code{Y} precision profile.}
 
-\item{rho}{\emph{optional} (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.}
+\item{rho}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{rho = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{alpha}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.}
+\item{alpha}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{alpha = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{beta}{\emph{optional} (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.}
+\item{beta}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{beta = numvalue} initialization is no longer implemented in algorithm.}
 
-\item{mu}{\emph{optional} (default of NA) - numeric, vector of length of \code{X}, initial estimate of \eqn{\mu}.}
+\item{mu}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{mu = numvector} initialization is no longer implemented in algorithm.}
 
 \item{MDL}{\emph{optional} (default to missing) - medical decision level(s).}
 
+\item{quad}{\emph{optional} (default of FALSE) - logical, selects fitting a linear or a quadratic regression.}
+
 \item{epsilon}{\emph{optional} (default of 1.e-8) - convergence tolerance limit.}
 
-\item{printem}{\emph{optional} (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
+\item{printem}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{printem = TRUE} is no
+longer supported; separate summary functions are provided for printing output.}
 }
 \value{
 A list containing the following components:
 
 \item{alpha }{the fitted intercept}
 \item{beta }{the fitted slope}
+\item{gamma}{the fitted coefficient of the square: if quad is FALSE, the value is zero}
+\item{quad}{logical, FALSE for linear or TRUE for quadratic regression}
 \item{cor }{the Pearson correlation between X and Y}
 \item{fity }{the vector of predicted Y}
 \item{mu }{the vector of estimated latent true values}
@@ -42,48 +51,63 @@ A list containing the following components:
 \item{sigma }{the estimate of the Rocke-Lorenzato \eqn{\sigma}}
 \item{kappa }{the estimate of the Rocke-Lorenzato \eqn{\kappa}}
 \item{L }{the -2 log likelihood L}
-\item{sealpha }{the jackknife standard error of alpha}
-\item{sebeta }{the jackknife standard error of beta}
-\item{covar }{the jackknife covariance between alpha and beta}
+\item{sealpha }{the jackknife standard error of  \eqn{alpha}}
+\item{sebeta }{the jackknife standard error of  \eqn{beta}}
+\item{segamma }{the jackknife standard error of  \eqn{gamma}}
+\item{covar }{the jackknife covariance between \code{alpha} and \code{beta} (and \code{gamma}, if quadratic)}
+\item{CIalpha}{the level 95\% confidence-interval estimate of \eqn{\alpha}}
+\item{CIbeta}{the level 95\% confidence-interval estimate of \eqn{\beta}}
+\item{CIgamma}{the level 95\% confidence-interval estimate of \eqn{\gamma}}
 \item{preMDL }{the predictions at the MDL(s)}
+\item{sepreMDL }{the jackknife standard error of predictions at the MDL}
 \item{preMDLl }{the lower confidence limit(s) of preMDL}
 \item{preMDLu }{the upper confidence limit(s) of preMDL}
+\item{whichmissing}{a logical vector identifying locations of missing X or Y values}
+\item{MDL}{vector of medical decision level(s)}
 }
 \description{
-This routine fits the regression, uses the jackknife to get its precision,
-and optionally prints it out.  Implements Rocke-Lorenzato as
-the variance profile model.
+This routine fits the regression and uses the jackknife to get its precision.
+Implements Rocke-Lorenzato as the variance profile model.
 }
 \details{
 For the linear model relating the predicate and test readings,
 the standard errors of the estimators \eqn{\hat{\alpha}},
-\eqn{\hat{\beta}},  and their covariance are estimated by
+\eqn{\hat{\beta}}, (and \eqn{\hat{\gamma}}, if quadratic) and their covariance are estimated by
 the jackknife.  The point estimates of the intercept and slope are output,
 along with their standard errors and covariance.
 
 These estimates are further used
-to estimate the predictions at the input \code{MDL}.
+to estimate the predictions at the input \code{MDL}, if appropriate.
 }
 \examples{
 # library
 library(ppwdeming)
 
 # parameter specifications
+n <- 100
+
 sigma <- 1
 kappa <- 0.08
 alpha <- 1
 beta  <- 1.1
-true  <- 8*10^((0:99)/99)
-truey <- alpha+beta*true
+quad  <- FALSE # or
+#quad  <- TRUE
+gamma <- 0
+if (quad) gamma <- -0.005
+true  <- 8*10^((0:(n-1))/(n-1))
+truey <- alpha+beta*true+gamma*true^2
 # simulate single sample - set seed for reproducibility
 set.seed(1039)
 # specifications for predicate method
-X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 # specifications for test method
-Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 
 # fit with RL precision profile to estimate parameters and variability
-\donttest{RL_inf <- PWD_inference(X,Y,MDL=12,printem=TRUE)}
+RL_inf <- PWD_inference(X,Y,MDL=12, quad=quad)
+
+# summary of results
+summary(RL_inf)
 
 }
 \references{

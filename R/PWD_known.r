@@ -7,7 +7,8 @@
 #'
 #' @usage
 #' PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8,
-#'           MDL=NA, getCI=TRUE, printem=FALSE)
+#'           MDL=NA, getCI=TRUE,
+#'           printem=lifecycle::deprecated())
 #'
 #' @param X		the vector of predicate readings.
 #' @param Y		the vector of test readings.
@@ -18,7 +19,8 @@
 #' @param MDL		*optional*  (default of NA) - medical decision level(s).
 #' @param getCI		*optional*  (default of TRUE) - allows for jackknifed standard errors on the regression and MDL.
 #' @param epsilon		*optional*  (default of 1.e-8) - convergence tolerance limit.
-#' @param printem	  *optional*  (default of FALSE) - if TRUE, routine will print out results as a `message`.
+#' @param printem `r lifecycle::badge("deprecated")` `printem = TRUE` is no
+#' longer supported; separate summary functions are provided for printing output.
 #'
 #' @details The functions `gfun` and `hfun` are allowed as inputs,
 #' to support flexibility in specification of the forms of these variance functions.
@@ -43,8 +45,11 @@
 #'   \item{sebeta }{the jackknife standard error of beta}
 #'   \item{covar }{the jackknife covariance between alpha and beta}
 #'   \item{preMDL }{the predictions at the MDL(s)}
+#'   \item{sepreMDL }{the jackknife standard error of predictions at the MDL}
 #'   \item{preMDLl }{the lower confidence limit(s) of preMDL}
 #'   \item{preMDLu }{the upper confidence limit(s) of preMDL}
+#'   \item{whichmissing}{a logical vector identifying locations of missing X or Y values}
+#'   \item{MDL}{vector of medical decision level(s)}
 #'
 #' @author Douglas M. Hawkins, Jessica J. Kraker <krakerjj@uwec.edu>
 #'
@@ -53,9 +58,11 @@
 #' library(ppwdeming)
 #'
 #' # parameter specifications
+#' n <- 100
+#'
 #' alpha <- 1
 #' beta  <- 1.1
-#' true  <- 8*10^((0:99)/99)
+#' true  <- 8*10^((0:(n-1))/(n-1))
 #' truey <- alpha+beta*true
 #' # forms of precision profiles
 #' gfun    <- function(true, gparms) {
@@ -73,21 +80,32 @@
 #' # simulate single sample - set seed for reproducibility
 #' set.seed(1039)
 #' # specifications for predicate method
-#' X     <- true +sqrt(g)*rnorm(100)
+#' X     <- true +sqrt(g)*rnorm(n)
 #' # specifications for test method
-#' Y     <- truey+sqrt(h)*rnorm(100)
+#' Y     <- truey+sqrt(h)*rnorm(n)
 #'
 #' # fit with to estimate linear parameters
 #' pwd_known_fit <- PWD_known(X, Y, gfun, hfun,
 #'                            gparms=c(4e-16, 0.07, 1.27),
-#'                            hparms=c(6e-2, 7e-5, 2.2), MDL=12,
-#'                            printem=TRUE)
+#'                            hparms=c(6e-2, 7e-5, 2.2), MDL=12)
+#' # display results
+#' summary(pwd_known_fit)
 #'
 #' @importFrom stats complete.cases
 #'
 #' @export
 
-PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8, MDL=NA, getCI=TRUE, printem=FALSE) {
+PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8,
+                      MDL=NA, getCI=TRUE,
+                      printem=lifecycle::deprecated()) {
+  if (lifecycle::is_present(printem)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_known(printem)",
+      details = "Argument printem no longer prints results-message.  \n See summary functions instead for printing output. \n Argument will be dropped in next release."
+    )
+  }
+
   whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
   missingcases <- (1:length(X))[whichmissing]
   allX <- X
@@ -147,6 +165,8 @@ PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8, MDL=NA, ge
   sealpha  <- NA
   sebeta   <- NA
   covar    <- NA
+  CIalpha <- c(NA, NA)
+  CIbeta <- c(NA, NA)
   if (getCI) top <- n
   for (dele in 0:top) {
     tx  <- X
@@ -175,41 +195,34 @@ PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8, MDL=NA, ge
       allpars <- rbind(allpars, do$par)
     }
   }
+
+  clevelused <- 95
+  tcut <- qt(0.975, n-1)
+
   if (getCI) {
     sealpha <- (n-1)*sd(allpars[,1]) / sqrt(n)
     sebeta  <- (n-1)*sd(allpars[,2]) / sqrt(n)
     covar   <- sealpha * sebeta * cor(allpars[,1], allpars[,2])
+
+    CIalpha   <- alpha + tcut * sealpha * c(-1,1)
+    CIbeta  <- beta + tcut * sebeta * c(-1,1)
   }
   nMDL    <- 0
   preMDL  <- NA
+  sepreMDL <- NA
   preMDLl <- NA
   preMDLu <- NA
   if (!is.na(sum(MDL))) {
     nMDL    <- length(MDL)
     preMDL  <- alpha + beta*MDL
     if (getCI) {
-      tcut    <- qt(0.975, n-1)
+      sepreMDL  <- sqrt(sealpha^2 + (sebeta*MDL)^2 + 2*covar*MDL)
       MoEpre  <- tcut*sqrt(sealpha^2 + (sebeta*MDL)^2 + 2*covar*MDL)
       preMDLl <- preMDL - MoEpre
       preMDLu	<- preMDL + MoEpre
     }
   }
 
-  if (printem) {
-    message(sprintf("%9s %8s %8s %9s", "Parameter", "estimate", "se", "CI"))
-    tcut <- qt(0.975, n-1)
-    CI   <- alpha + tcut * sealpha * c(-1,1)
-    message(sprintf("Intercept %8.3f %8.3f (%7.3f, %6.3f)", alpha, sealpha, CI[1], CI[2]))
-    CI   <- beta + tcut * sebeta * c(-1,1)
-    message(sprintf("slope     %8.3f %8.3f (%7.3f, %6.3f)\n", beta , sebeta, CI[1], CI[2]))
-    if (nMDL > 0) {
-      for (kk in 1:nMDL) {
-        message(sprintf("MDL %7.3f prediction %7.3f CI %7.3f %7.3f",
-                        MDL[kk], preMDL[kk], preMDLl[kk], preMDLu[kk]))
-      }
-    }
-    if(sum(whichmissing) > 0) message(sprintf("\t\t Fit on n = %i complete readings", sum(!whichmissing)))
-  }
   corXY <- cor(X,Y)
 
   allfity = rep(NA, length(allX))
@@ -221,7 +234,14 @@ PWD_known <- function(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8, MDL=NA, ge
   allscalr = rep(NA, length(allX))
   allscalr[!whichmissing] = full$scalr
 
-  return(list(alpha=alpha, beta=beta, cor=corXY, fity=allfity, mu=allmu,
-              resi=allresi, scalr=allscalr, L=L, sealpha=sealpha, sebeta=sebeta,
-              covar=covar, preMDL=preMDL, preMDLl=preMDLl, preMDLu=preMDLu))
+  fullout <- list(alpha=alpha, beta=beta,
+                  cor=corXY, fity=allfity, mu=allmu,
+                  resi=allresi, scalr=allscalr, L=L,
+                  sealpha=sealpha, sebeta=sebeta, covar=covar,
+                  clevelused=clevelused, CIalpha=CIalpha, CIbeta=CIbeta,
+                  preMDL=preMDL, sepreMDL=sepreMDL, preMDLl=preMDLl, preMDLu=preMDLu,
+                  whichmissing=whichmissing, MDL=MDL)
+  class(fullout) <- c("pwdknown", "list")
+
+  return(fullout)
 }

@@ -1,6 +1,6 @@
 Package: ppwdeming
-Version: 2.1.0.1
-Date: 2026-3-18
+Version: 3.0.1
+Date: 2026-7-23
 Title: Precision Profile Weighted Deming Regression 
 Authors@R: c(person("Douglas M.", "Hawkins", role = c("aut", "cph")),
               person("Jessica J.", "Kraker", role = c("aut", "cre"),
@@ -10,7 +10,8 @@ Author: Douglas M. Hawkins [aut, cph],
 Maintainer: Jessica J. Kraker <krakerjj@uwec.edu>
 Depends: R (>= 3.6.0)
 Suggests: 
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    lifecycle (>= 1.0.5)
 Imports: 
     stats
 Description: Weighted Deming regression, also known as 'errors-in-variable' 
@@ -26,15 +27,20 @@ Description: Weighted Deming regression, also known as 'errors-in-variable'
     jackknifing); standardized-residual analysis function with regression 
     diagnostic tools for normality, linearity and constant variance; and an 
     outlier analysis identifying significant outliers for closer investigation. 
-    Weighted Deming regression is also now implemented for multiple instruments.
     The following reference provides further information on mathematical 
     derivations and applications. 
     Hawkins, D.M., and J.J. Kraker (2026). 'Precision Profile Weighted
     Deming Regression for Methods Comparison'. 
     The Journal of Applied Laboratory Medicine 11, 379-392
     <doi:10.1093/jalm/jfaf183>.
+    Weighted Deming regression is also now implemented for multiple 
+    instruments , as set out in Hawkins, D.M., and J.J. Kraker (2026).
+    'Multiple Instrument Methods Comparison by Precision weighted Deming 
+    Regression', on Arxiv <doi:10.48550/arXiv.2607.11776>.
+    The “multi” functions refer to the multiple instrument analysis, and 
+    the "PWD" functions refer to the two-instrument.
 License: GPL (>= 3)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.0.0

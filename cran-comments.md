@@ -2,7 +2,8 @@
 
 0 errors | 0 warnings | 0 notes
 
-* This is a minor update, due to correction in one of the function's storage.
+* This is a major update, replacing old (linear)  algorithm with new (quadratic)
+  algorithm performs slightly differently, but generally gets closer to optimum.
 
 ## R CMD check results
 

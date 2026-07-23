@@ -6,12 +6,14 @@
 #' **residuals** from the fit.
 #'
 #' @usage
-#' PWD_resi(true, resi, epsilon=1e-8, printem=FALSE)
+#' PWD_resi(true, resi, epsilon=1e-8,
+#'          printem=lifecycle::deprecated())
 #'
 #' @param true  	the vector of values used to predict the precision – commonly X.
 #' @param resi		the vector of residuals whose variance is thought to be a function of “true”.
 #' @param epsilon		*optional* (default of 1e-8) - convergence tolerance limit.
-#' @param printem	  *optional* (default of FALSE) - if TRUE, routine will print out results as a `message`.
+#' @param printem `r lifecycle::badge("deprecated")` `printem = TRUE` is no
+#' longer supported; separate summary functions are provided for printing output.
 #'
 #' @details  The Rocke-Lorenzato precision profile model is
 #' \deqn{SD^2 = \sigma_r^2 + (\kappa_r\cdot true)^2}
@@ -40,23 +42,26 @@
 #' library(ppwdeming)
 #'
 #' # parameter specifications
+#' n <- 100
+#'
 #' sigma <- 1
 #' kappa <- 0.08
 #' alpha <- 1
 #' beta  <- 1.1
-#' true  <- 8*10^((0:99)/99)
+#' true  <- 8*10^((0:(n-1))/(n-1))
 #' truey <- alpha+beta*true
 #' # simulate single sample - set seed for reproducibility
 #' set.seed(1039)
 #' # specifications for predicate method
-#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 #' # specifications for test method
-#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 #'
 #' # fit the model and store output
 #' RL_gh_fit  <- PWD_get_gh(X,Y)
 #' # run the residual analysis from the model output
-#' post  <- PWD_resi(X, RL_gh_fit$resi, printem=TRUE)
+#' post  <- PWD_resi(X, RL_gh_fit$resi)
+#' summary(post)
 #'
 #' @references Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
 #' Deming Regression for Methods Comparison.
@@ -73,7 +78,16 @@
 #'
 #' @export
 
-PWD_resi    <- function(true, resi, epsilon=1e-8, printem=FALSE) {
+PWD_resi <- function(true, resi, epsilon=1e-8,
+                        printem=lifecycle::deprecated()) {
+  if (lifecycle::is_present(printem)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_resi(printem)",
+      details = "Argument printem no longer prints results-message.  \n See summary functions instead for printing output. \n Argument will be dropped in next release."
+    )
+  }
+
   whichmissing <- (!complete.cases(true)) | (!complete.cases(resi))
   missingcases <- (1:length(true))[whichmissing]
   alltrue <- true
@@ -134,19 +148,14 @@ PWD_resi    <- function(true, resi, epsilon=1e-8, printem=FALSE) {
   poolsig <- sqrt(mean(vars))
   poolkap <- sqrt(mean(cvsq))
 
-  if (printem) {
-    SW    <- shapiro.test(scalr)$p.value
-    message(sprintf("Rocke-Lorenzato fit to residuals\nsigma %6.4f kappa %6.4f",
-                sigma, kappa))
-    if(sum(whichmissing) > 0) message(sprintf("\t Fit on n = %i complete residuals\n", sum(!whichmissing)))
-    message(sprintf("P value for normality %6.4f",
-                SW))
-  }
-
   allscalr = rep(NA, length(alltrue))
   allscalr[!whichmissing] = scalr
 
-  return(list(sigmar=sigma, kappar=kappa, L=L, scalr=scalr,
-              poolsig=poolsig, poolkap=poolkap))
+  fullout <- list(sigmar=sigma, kappar=kappa, L=L, scalr=scalr,
+              poolsig=poolsig, poolkap=poolkap, whichmissing=whichmissing)
+
+  class(fullout) <- c("pwdresi", "list")
+
+  return(fullout)
 }
 

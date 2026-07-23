@@ -38,9 +38,11 @@
 #' library(ppwdeming)
 #'
 #' # parameter specifications
+#' n <- 100
+#'
 #' alpha <- 1
 #' beta  <- 1.1
-#' true  <- 8*10^((0:99)/99)
+#' true  <- 8*10^((0:(n-1))/(n-1))
 #' truey <- alpha+beta*true
 #' # Loosely motivated by Vitamin D data set
 #' g     <- 4e-16+0.07*true^1.27
@@ -49,9 +51,9 @@
 #' # simulate single sample - set seed for reproducibility
 #' set.seed(1039)
 #' # specifications for predicate method
-#' X     <- true +sqrt(g)*rnorm(100)
+#' X     <- true +sqrt(g)*rnorm(n)
 #' # specifications for test method
-#' Y     <- truey+sqrt(h)*rnorm(100)
+#' Y     <- truey+sqrt(h)*rnorm(n)
 #'
 #' # fit with to estimate linear parameters
 #' wd_fit <- WD_General(X,Y,g,h)

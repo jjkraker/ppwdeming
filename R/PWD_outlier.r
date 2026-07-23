@@ -6,7 +6,11 @@
 #' a sanitized data set (with outliers removed).
 #'
 #' @usage
-#' PWD_outlier(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA)
+#' PWD_outlier(X, Y, K, lambda=1, Pcut=0.01,
+#'             rho=lifecycle::deprecated(),
+#'             alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+#'             mu=lifecycle::deprecated(),
+#'             quad=FALSE)
 #'
 #' @param X		the vector of predicate readings.
 #' @param Y		the vector of test readings.
@@ -14,10 +18,11 @@
 #' @param lambda		*optional* (default of 1) - the ratio of the `X` to
 #' the `Y` precision profile.
 #' @param Pcut		  *optional*, default 0.01 (1%), cutoff for statistical significance of Bonferroni P.
-#' @param rho       *optional* (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.
-#' @param alpha     *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.
-#' @param beta      *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.
-#' @param mu        *optional* (default of NA) - numeric, vector of length of `X`, initial estimate of \eqn{\mu}.
+#' @param rho       `r lifecycle::badge("deprecated")` `rho = numvalue` initialization is no longer implemented in algorithm.
+#' @param alpha     `r lifecycle::badge("deprecated")` `alpha = numvalue` initialization is no longer implemented in algorithm.
+#' @param beta      `r lifecycle::badge("deprecated")` `beta = numvalue` initialization is no longer implemented in algorithm.
+#' @param mu        `r lifecycle::badge("deprecated")` `mu = numvector` initialization is no longer implemented in algorithm.
+#' @param quad      *optional* (default of FALSE) - logical, selects fitting a linear or a quadratic regression.
 #'
 #' @details
 #' The method is modeled on the Rosner sequential ESD outlier procedure and
@@ -31,8 +36,8 @@
 #'   \item{cor }{the Pearson correlation between X and Y}
 #'   \item{cleancor }{the Pearson correlation between cleaned X and Y (after outliers removed)}
 #'   \item{scalr}{the scaled residuals of all cases from the sanitized fit and whose normal tail areas provide the basis for the outlier P values}
-#'   \item{basepar}{the sigma, kappa, alpha, beta of the full data set}
-#'   \item{lastpar}{the sigma, kappa, alpha, beta of the sanitized data set}
+#'   \item{basepar}{the sigma, kappa, alpha, beta, gamma of the full data set}
+#'   \item{lastpar}{the sigma, kappa, alpha, beta, gamma of the sanitized data set}
 #'   \item{forward }{dataframe summarizing the forward identification of possible outliers}
 #'   \item{backward }{dataframe summarizing the backward reinclusion of cases}
 #'   \item{tee }{the t statistics of the final identified outliers}
@@ -46,23 +51,28 @@
 #' library(ppwdeming)
 #'
 #' # parameter specifications
+#' n <- 100
+#'
 #' sigma <- 1
 #' kappa <- 0.08
 #' alpha <- 1
 #' beta  <- 1.1
-#' true  <- 8*10^((0:99)/99)
+#' true  <- 8*10^((0:(n-1))/(n-1))
 #' truey <- alpha+beta*true
 #' # simulate single sample - set seed for reproducibility
 #' set.seed(1069)
 #' # specifications for predicate method
-#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 #' # specifications for test method
-#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 #' # add some outliers
 #' Y[c(1,2,100)] <- Y[c(1,2,100)] + c(-10,9,-50)
 #'
-#' # check for outliers, re-fit, and store output
-#' \donttest{outliers_assess <- PWD_outlier(X, Y, K=5)}
+#' # check for outliers and store output
+#' outliers_assess <- PWD_outlier(X, Y, K=5)
+#'
+#' # summary of process
+#' summary(outliers_assess)
 #'
 #' @references Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
 #' Deming Regression for Methods Comparison.
@@ -80,7 +90,41 @@
 #'
 #' @export
 
-PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA, mu=NA) {
+PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01,
+                        rho=lifecycle::deprecated(),
+                        alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+                        mu=lifecycle::deprecated(),
+                        quad=FALSE) {
+  if (lifecycle::is_present(rho)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_outlier(rho)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(alpha)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_outlier(alpha)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(beta)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_outlier(beta)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(mu)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_outlier(mu)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  rho=NA; alpha=NA; beta=NA; gamma=NA; mu=NA
+
   whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
   missingcases <- (1:length(X))[whichmissing]
   allX <- X
@@ -97,23 +141,27 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA,
   initlis <- NULL
   initZ   <- NULL
 
-  do_orig <- PWD_get_gh(X, Y, lambda, rho, alpha, beta, mu)
+  do_orig <- PWD_get_gh(X, Y, lambda, quad=quad)
 
   for (m in 1:K) {
     x        <- X[clean]
     y        <- Y[clean]
-    do       <- PWD_get_gh(x, y, lambda)
+    do       <- PWD_get_gh(x, y, lambda, quad=quad)
     if (m == 1) do <- do_orig
     printres <- FALSE
+    sigma    <- unname(do$sigma)
+    kappa    <- unname(do$kappa)
     alpha    <- unname(do$alpha)
-    beta     <- unname(do$beta)
+    beta     <- unname(do$beta )
+    gamma    <- unname(do$gamma)
+    L        <- unname(do$L    )
     resi     <- y - alpha - beta*x
     fitres   <- PWD_resi(x, resi)
     sigr     <- fitres$sigmar
     kapr     <- fitres$kappar
     scalr    <- fitres$scalr
     if (m == 1) {
-      basepar  <- c(do$sigma, do$kappa, unname(do$alpha), unname(do$beta), do$like)
+      basepar  <- c(sigma, kappa, alpha, beta, gamma, L   )
       lastpar  <- basepar                 # If there are no outliers
       cor      <- cor(X,Y)
       allscalr <- scalr
@@ -138,17 +186,21 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA,
   for (m in 1:K) {
     x         <- X[clean]
     y         <- Y[clean]
-    do        <- PWD_get_gh(x, y, lambda)
+    do        <- PWD_get_gh(x, y, lambda, quad=quad)
+    sigma     <- unname(do$sigma)
+    kappa     <- unname(do$kappa)
     alpha     <- unname(do$alpha)
-    beta      <- unname(do$beta)
-    resi      <- y - alpha - beta*x
+    beta      <- unname(do$beta )
+    gamma     <- unname(do$gamma)
+    L         <- unname(do$L    )
+    resi      <- y - alpha - beta*x - gamma*x^2
     fitres    <- PWD_resi(x, resi)
     sigr      <- fitres$sigmar
     kapr      <- fitres$kappar
     scalr     <- fitres$scalr
     meanr     <- mean(scalr)
     sdr       <- sd(scalr)
-    fitsusp   <- alpha + beta*X[drop]
+    fitsusp   <- alpha + beta*X[drop] + gamma*X[drop]^2
     resisusp  <- Y[drop] - fitsusp
     profl     <- sqrt(sigr^2 + (kapr*fitsusp)^2)
     scalrsusp <- resisusp/profl
@@ -162,7 +214,7 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA,
     backlis <- c(backlis, idof)
     backP   <- c(backP, maxbon)
     if (maxbon < Pcut) {
-      lastpar <- c(do$sigma, do$kappa, unname(do$alpha), unname(do$beta), do$like)
+      lastpar <- c(sigma, kappa, alpha, beta, gamma, L   )
       break
     }
     drop    <- drop[-whereis]
@@ -187,9 +239,12 @@ PWD_outlier <- function(X, Y, K, lambda=1, Pcut=0.01, rho=NA, alpha=NA, beta=NA,
     colnames(outlis) <- c("case", "X", "Y", "t", "Bonf P")
   }
 
-  return(list(ndrop=ndrop, drop=drop, cor=cor,
-              cleancor=cleancor,
-              scalr=allscalr, basepar=basepar, lastpar=lastpar,
-              forward=forward, backward=backward,
-              tee=tee, BonP=BonP, outlis=outlis))
+  fullout <- list(ndrop=ndrop, drop=drop, cor=cor,
+                  cleancor=cleancor,
+                  scalr=allscalr, basepar=basepar, lastpar=lastpar,
+                  forward=forward, backward=backward, Pcut=Pcut,
+                  tee=tee, BonP=BonP, outlis=outlis)
+class(fullout) <- c("pwdout", "list")
+
+return(fullout)
 }

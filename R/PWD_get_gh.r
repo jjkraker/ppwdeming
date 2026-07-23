@@ -7,26 +7,33 @@
 #' also provides the resulting weighted Deming fit and residuals.
 #'
 #' @usage
-#' PWD_get_gh(X, Y, lambda = 1, rho=NA, alpha=NA, beta=NA, mu=NA,
-#'            epsilon = 1e-8, printem=FALSE)
+#' PWD_get_gh(X, Y, lambda = 1,
+#'            rho=lifecycle::deprecated(),
+#'            alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+#'            mu=lifecycle::deprecated(),
+#'            quad=FALSE, epsilon = 1e-8,
+#'            printem=lifecycle::deprecated())
 #'
 #' @param X		the vector of predicate readings.
 #' @param Y		the vector of test readings.
 #' @param lambda		*optional* (default of 1) - the ratio of the `X` to
 #' the `Y` precision profile.
-#' @param rho       *optional* (default of NA) - numeric, single value or vector, initial estimate(s) of \eqn{\rho = \frac{\sigma}{\kappa}}.
-#' @param alpha     *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\alpha}.
-#' @param beta      *optional* (default of NA) - numeric, single value, initial estimate of \eqn{\beta}.
-#' @param mu        *optional* (default of NA) - numeric, vector of length of `X`, initial estimate of \eqn{\mu}.
+#' @param rho       `r lifecycle::badge("deprecated")` `rho = numvalue` initialization is no longer implemented in algorithm.
+#' @param alpha     `r lifecycle::badge("deprecated")` `alpha = numvalue` initialization is no longer implemented in algorithm.
+#' @param beta      `r lifecycle::badge("deprecated")` `beta = numvalue` initialization is no longer implemented in algorithm.
+#' @param mu        `r lifecycle::badge("deprecated")` `mu = numvector` initialization is no longer implemented in algorithm.
+#' @param quad      *optional* (default of FALSE) - logical, selects fitting a linear or a quadratic regression.
 #' @param epsilon		*optional* (default of 1.e-8) - convergence tolerance limit.
-#' @param printem	  *optional* (default of FALSE) - if TRUE, routine will print out results as a `message`.
+#' @param printem `r lifecycle::badge("deprecated")` `printem = TRUE` is no
+#' longer supported; separate summary functions are provided for printing output.
 #'
 #' @details
 #' This workhorse routine optimizes the likelihood in the **unknown** *g*, *h*
-#' setting over its *n*+4 parameters
-#' (the two Rocke-Lorenzato precision profile parameters \eqn{\sigma}
-#' and \eqn{\kappa}, the intercept \eqn{\alpha} and slope \eqn{\beta},
-#' and the *n* latent true concentrations \eqn{\mu_i}).
+#' setting over its *n*+4 or *n*+5 parameters:
+#' the two Rocke-Lorenzato precision profile parameters \eqn{\sigma}
+#' and \eqn{\kappa}, the intercept \eqn{\alpha} and slope \eqn{\beta}
+#' (and coefficien of the squared term \eqn{\gamma}, if quadratic),
+#' and the *n* latent true concentrations \eqn{\mu_i}.
 #'
 #' That is, the assumed forms are:
 #'    * predicate precision profile model: \eqn{g_i = var(X_i) = \lambda\left(\sigma^2 + \left[\kappa\cdot \mu_i\right]^2\right)} and
@@ -35,15 +42,12 @@
 #' The search algorithm implements an efficient approach via reparameterization
 #' to the ratio \eqn{\rho = \frac{\sigma}{\kappa}}.
 #'
-#' If initial estimates are not provided, the parameters are initialized as:
-#'    * `alpha` and `beta` are initially intercept and slope from simple linear regression;
-#'    * `rho` is initialized as the vector c(0.01, 1, 100); and
-#'    * `mu` is initialized as the values of `X`.
-#'
 #' @returns A list containing the following components:
 #'
 #'   \item{alpha }{the fitted intercept}
 #'   \item{beta }{the fitted slope}
+#'   \item{gamma}{the fitted coefficient of the square: if quad is FALSE, the value is zero}
+#'   \item{quad}{logical, FALSE for linear or TRUE for quadratic regression}
 #'   \item{fity }{the vector of predicted Y}
 #'   \item{mu }{the vector of estimated latent true values}
 #'   \item{resi }{the vector of residuals}
@@ -58,27 +62,30 @@
 #' library(ppwdeming)
 #'
 #' # parameter specifications
+#' n <- 100
+#'
+#' quad  <- FALSE   # for a linear fit
+#' quad  <- TRUE    # for a quadratic fit
 #' sigma <- 1
 #' kappa <- 0.08
 #' alpha <- 1
 #' beta  <- 1.1
-#' true  <- 8*10^((0:99)/99)
-#' truey <- alpha+beta*true
+#' gamma <- 0
+#' if (quad) gamma <- -0.005
+#' true  <- 8*10^((0:(n-1))/(n-1))
+#' truey <- alpha+beta*true+gamma*true^2
 #' # simulate single sample - set seed for reproducibility
 #' set.seed(1039)
 #' # specifications for predicate method
-#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+#' X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 #' # specifications for test method
-#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+#' Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 #'
 #' # fit with RL precision profile to estimate parameters
-#' RL_gh_fit  <- PWD_get_gh(X,Y,printem=TRUE)
-#' # RL precision profile estimated parameters
-#' cat("\nsigmahat=", signif(RL_gh_fit$sigma,6),
-#'     "and kappahat=", signif(RL_gh_fit$kappa,6), "\n")
-#' # with estimated linear coefficients
-#' cat("\nalphahat=", signif(RL_gh_fit$alpha,6),
-#'     "and betahat=", signif(RL_gh_fit$beta,6), "\n")
+#' RL_gh_fit  <- PWD_get_gh(X,Y, quad=quad)
+#'
+#' # results
+#' summary(RL_gh_fit)
 #'
 #' @references Hawkins DM and Kraker JJ (2026). Precision Profile Weighted
 #' Deming Regression for Methods Comparison.
@@ -94,8 +101,52 @@
 #'
 #' @export
 
-PWD_get_gh <- function (X, Y, lambda = 1, rho=NA,
-                        alpha=NA, beta=NA, mu=NA, epsilon = 1e-8, printem=FALSE) {
+PWD_get_gh <- function(X, Y, lambda = 1,
+                       rho=lifecycle::deprecated(),
+                       alpha=lifecycle::deprecated(), beta=lifecycle::deprecated(),
+                       mu=lifecycle::deprecated(),
+                       quad=FALSE, epsilon = 1e-8,
+                       printem=lifecycle::deprecated()) {
+
+# updated as per code in June 29 email
+
+  if (lifecycle::is_present(printem)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_get_gh(printem)",
+      details = "Argument printem no longer prints results-message.  \n See summary functions instead for printing output. \n Argument will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(rho)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_get_gh(rho)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(alpha)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_get_gh(alpha)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(beta)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_get_gh(beta)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  if (lifecycle::is_present(mu)) {
+    lifecycle::deprecate_warn(
+      when = "3.0.0",
+      what = "PWD_get_gh(mu)",
+      details = "Initialization arguments rho, alpha, beta, and mu are no longer \n implemented in algorithm. \n Arguments will be dropped in next release."
+    )
+  }
+  rho=NA; alpha=NA; beta=NA; gamma=NA; mu=NA
+
   whichmissing <- (!complete.cases(X)) | (!complete.cases(Y))
   missingcases <- (1:length(X))[whichmissing]
   allX <- X
@@ -104,53 +155,73 @@ PWD_get_gh <- function (X, Y, lambda = 1, rho=NA,
   Y <- Y[!whichmissing]
   if(sum(!is.na(mu)) > 0) mu <- mu[!whichmissing]
 
-  # inner function takes old mu, alpha, beta, g, h and gets new mu
-  getmu <- function(X, Y, alpha, beta, g, h, mu, epsilon=1e-8) {
+  n     <- length(X)
+  tun   <- 2*n
+  A     <- tun * (1-log(tun))
+  ones  <- rep(1, n)
+
+  innerfit <- function(rho, X, Y, lambda=1, alpha, beta, gamma, mu, quad, epsilon=1e-7) {
+    if (is.na(sum(mu))) mu    <- X
     diffr <- 2*epsilon
     innr  <- 0
     while (diffr > epsilon & innr < 100) {
       innr <- innr + 1
       old  <- mu
-      fity <- alpha + beta*mu
-      mu   <- (h * X + g * beta * (Y - alpha))/(h + g * beta^2)
+      fity <- alpha + beta*mu + gamma*mu^2
+      g    <- rho^2 + mu^2
+      h    <- rho^2 + fity^2
+      if (!quad) {
+        mu   <- (h * X + g * beta * (Y - alpha))/(h + g * beta^2)
+      } else {
+        mu   <- NULL
+        for (i in 1:n) {
+          x    <- X[i]
+          y    <- Y[i]-alpha
+          gi   <- g[i]
+          hi   <- h[i]
+          ccof <- c(-(x/gi+beta*y/hi),1/gi+(beta^2-2*gamma*y)/hi,
+                    3*gamma*beta/hi, 2*gamma^2/hi)
+          cub  <- polyroot(ccof)
+          sele <- abs(Im(cub))<1e-5
+          soln <- Re(cub[sele])[1]    # Smallest real root
+          mu <- c(mu, soln)
+        }
+      }
+      #     Check for possible mu degeneracy
+      lenrat <- sum(mu^2) / sum(X^2)
+      alpha  <- 0
+      beta   <- 1
+      gamma  <- 0
+      if (lenrat > 0.5)  {   # Avoid mu degenerating to a point.
+        musq   <- mu^2
+        ruter  <- 1/sqrt(h)
+        Z      <- ruter * cbind(Y-mu, ones, mu)
+        if (quad) Z <- cbind(Z, ruter*musq)
+        ZTZ    <- t(Z) %*% Z
+        ZTZI   <- solve(ZTZ)
+        R      <- ZTZI[1,1]
+        coff   <- -ZTZI[-1,1]/R
+        alpha <- coff[1]
+        beta  <- coff[2]+1
+        if (quad) gamma <- coff[3]
+      }
       diffr <- sum((mu - old)^2)/sum(mu^2)
     }
-    return(list(mu=mu, innr=innr))
-  }
-
-  # calculates L from alpha, beta, sigma, kappa
-  qform   <- function(par) {
-    rho   <- par[1]
-    alpha <- par[2]
-    beta  <- par[3]
-    diffr <- 2*epsilon
-    refine <- 0
-    while(diffr > epsilon & refine < 100) {
-      refine <- refine+1
-      old <- mu
-      fity  <- alpha + beta*mu
-      resi  <- Y - alpha - beta*X
-      g     <- lambda * (rho^2 + mu^2)
-      h     <-           rho^2 + fity^2
-      mu    <- getmu(X, Y, alpha, beta, g, h, mu)$mu
-      diffr <- sum((old-mu)^2)/sum(mu^2)
-    }
-
+    fity <- alpha + beta*mu + gamma*mu^2
     W     <- sum((X-mu)^2/g+(Y-fity)^2/h)
-    slgh  <- sum(log(g*h))
     kappa <- sqrt(W/tun)
     sigma <- rho*kappa
+    slgh  <- sum(log(g*h))
     L     <- tun*log(W) + slgh + A
-    L     <- L - 1000 * min(c(0, rho))
-    return(list(L=L, W=W, sigma=sigma, kappa=kappa, alpha=alpha,
-                beta=beta, mu=mu, fity=fity, resi=resi))
+    #	print(paste(L, alpha, beta, gamma))
+    return(list(L=L, W=W, alpha=alpha, beta=beta, gamma=gamma,
+                sigma=sigma, kappa=kappa,mu=mu, fity=fity, resi=Y-fity))
+  }    #  end of innerfit
+
+  wrapper <- function(logrho, X, Y, lambda, alpha, beta, gamma, mu, quad) {
+    innerfit(exp(logrho), X, Y, lambda, alpha, beta, gamma, mu, quad)$L
   }
 
-  # Wrapper
-  wrapqform <- function(par) {
-    do <- qform(par)
-    do$L
-  }
 
   # Preliminary ranging
   if (is.na(alpha + beta)) {
@@ -158,36 +229,55 @@ PWD_get_gh <- function (X, Y, lambda = 1, rho=NA,
     fitlm <- lm(Y~X)
     alpha <- coef(fitlm)[1]
     beta  <- coef(fitlm)[2]
+    gamma <- 0
   }
-  if (any(is.na(rho)))     rho   <- c(0.01, 1, 100)
+
   if (is.na(sum(mu))) mu    <- X
 
-  n     <- length(X)
-  tun   <- 2*n
-  A     <- tun * (1-log(tun))
-
-  nrho  <- length(rho)
-  best  <- 1e10
-  for (mm in 1:nrho) {
-    par   <- c(rho[mm], alpha, beta)
-    doit  <- optim(par, wrapqform)
-    L     <- doit$value
-    if (L < best) {
-      best <- L
-      bestpars <- doit$par
-    }
+  # Ranging on rho
+  nmesh  <- 20    # possible
+  rmesh  <- seq(-5, 5, length.out=nmesh)
+  profil <- NULL
+  for (rho in rmesh) {
+    LL <- wrapper(rho,X, Y, lambda, alpha, beta, gamma, mu, quad)
+    profil <- c(profil, LL)
   }
-  wrap <- qform(bestpars)
-  resi <- Y - bestpars[2] - bestpars[3]*X
+  #  plot(rmesh, profil, xlab="ln(rho)", ylab="l", type="l")
+  minof <- (1:nmesh)[profil == min(profil)]
+  lowval <- rmesh[max(1,minof-1)]
+  hival  <- rmesh[min(nmesh, minof+1)]
+  #  cat(sprintf("Rho space %6.4f %6.4f\n", exp(lowval), exp(hival)))
+  # End ranging
+
+  fitit <- optimize(wrapper, c(-5,5), X=X, Y=Y, lambda=lambda,
+                    alpha=alpha, beta=beta, gamma=gamma, mu=mu, quad=quad)
+  bestrho <- exp(fitit$minimum)
+  do      <- innerfit(bestrho, X, Y, lambda, alpha, beta, gamma, mu, quad)
+
+  #  print(do)
+  L     <- do$L
+  alpha <- do$alpha
+  beta  <- do$beta
+  gamma <- do$gamma
+  sigma <- do$sigma
+  kappa <- do$kappa
+  mu    <- do$mu
+  fity  <- do$fity
+  resi  <- do$resi
 
   allresi = rep(NA, length(allX))
   allresi[!whichmissing] = resi
   allfity = rep(NA, length(allX))
-  allfity[!whichmissing] = wrap$fity
+  allfity[!whichmissing] = fity
   allmu = rep(NA, length(allX))
-  allmu[!whichmissing] = wrap$mu
+  allmu[!whichmissing] = mu
 
-  return(list(alpha = bestpars[2], beta = bestpars[3], fity = allfity,
-              mu = allmu, resi = allresi, rho=wrap$sigma/wrap$kappa, sigma = wrap$sigma,
-              kappa = wrap$kappa, L = wrap$L))
+  fullout <- list(alpha=unname(alpha), beta=unname(beta), gamma=unname(gamma), quad=quad,
+                  fity=fity,mu=mu, resi=resi,
+                  rho=sigma/kappa, sigma=sigma, kappa=kappa, L=L)
+
+  class(fullout) <- c("pwdgetgh")
+
+  return(fullout)
+
 }

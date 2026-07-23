@@ -5,7 +5,8 @@
 \title{Weighted Deming Regression -- general weights}
 \usage{
 PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8,
-          MDL=NA, getCI=TRUE, printem=FALSE)
+          MDL=NA, getCI=TRUE,
+          printem=lifecycle::deprecated())
 }
 \arguments{
 \item{X}{the vector of predicate readings.}
@@ -26,7 +27,8 @@ PWD_known(X, Y, gfun, hfun, gparms, hparms, epsilon=1e-8,
 
 \item{getCI}{\emph{optional}  (default of TRUE) - allows for jackknifed standard errors on the regression and MDL.}
 
-\item{printem}{\emph{optional}  (default of FALSE) - if TRUE, routine will print out results as a \code{message}.}
+\item{printem}{\ifelse{html}{\href{https://lifecycle.r-lib.org/articles/stages.html#deprecated}{\figure{lifecycle-deprecated.svg}{options: alt='[Deprecated]'}}}{\strong{[Deprecated]}} \code{printem = TRUE} is no
+longer supported; separate summary functions are provided for printing output.}
 }
 \value{
 A list containing the following components:
@@ -43,8 +45,11 @@ A list containing the following components:
 \item{sebeta }{the jackknife standard error of beta}
 \item{covar }{the jackknife covariance between alpha and beta}
 \item{preMDL }{the predictions at the MDL(s)}
+\item{sepreMDL }{the jackknife standard error of predictions at the MDL}
 \item{preMDLl }{the lower confidence limit(s) of preMDL}
 \item{preMDLu }{the upper confidence limit(s) of preMDL}
+\item{whichmissing}{a logical vector identifying locations of missing X or Y values}
+\item{MDL}{vector of medical decision level(s)}
 }
 \description{
 This code is used for the setting of known precision profiles implemented
@@ -65,9 +70,11 @@ between predicate and test readings.
 library(ppwdeming)
 
 # parameter specifications
+n <- 100
+
 alpha <- 1
 beta  <- 1.1
-true  <- 8*10^((0:99)/99)
+true  <- 8*10^((0:(n-1))/(n-1))
 truey <- alpha+beta*true
 # forms of precision profiles
 gfun    <- function(true, gparms) {
@@ -85,15 +92,16 @@ h     <- 6e-2+7e-5*truey^2.2
 # simulate single sample - set seed for reproducibility
 set.seed(1039)
 # specifications for predicate method
-X     <- true +sqrt(g)*rnorm(100)
+X     <- true +sqrt(g)*rnorm(n)
 # specifications for test method
-Y     <- truey+sqrt(h)*rnorm(100)
+Y     <- truey+sqrt(h)*rnorm(n)
 
 # fit with to estimate linear parameters
 pwd_known_fit <- PWD_known(X, Y, gfun, hfun,
                            gparms=c(4e-16, 0.07, 1.27),
-                           hparms=c(6e-2, 7e-5, 2.2), MDL=12,
-                           printem=TRUE)
+                           hparms=c(6e-2, 7e-5, 2.2), MDL=12)
+# display results
+summary(pwd_known_fit)
 
 }
 \author{

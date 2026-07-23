@@ -60,18 +60,20 @@ The algorithm uses maximum likelihood estimation.  Proportionality constant
 library(ppwdeming)
 
 # parameter specifications
+n <- 100
+
 sigma <- 1
 kappa <- 0.08
 alpha <- 1
 beta  <- 1.1
-true  <- 8*10^((0:99)/99)
+true  <- 8*10^((0:(n-1))/(n-1))
 truey <- alpha+beta*true
 # simulate single sample - set seed for reproducibility
 set.seed(1039)
 # specifications for predicate method
-X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(100))
+X     <- sigma*rnorm(100)+true *(1+kappa*rnorm(n))
 # specifications for test method
-Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(100))
+Y     <- sigma*rnorm(100)+truey*(1+kappa*rnorm(n))
 
 # fit RL with given sigma and kappa
 RL_results <- PWD_RL(X,Y,sigma,kappa)
