@@ -1,3 +1,8 @@
+# ppwdeming 3.0.2
+
+* revised various multi_ function examples to have smaller n, for
+  testing purposes (<10s).
+  
 # ppwdeming 3.0.1
 
 * revised the PWD_inference example to run the shorter (linear) version, for

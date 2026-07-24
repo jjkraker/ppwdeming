@@ -60,7 +60,7 @@ a set of statistically significant outliers remains.
 library(ppwdeming)
 
 # parameter specifications
-n  <- 120
+n  <- 100
 I  <- 4
 alpha  <- c(0  , 0  , 2  , -2 )
 beta   <- c(0.9, 1.1, 1.2, 0.8)
